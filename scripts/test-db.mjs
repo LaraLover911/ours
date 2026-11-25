@@ -272,5 +272,165 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("integrations: connections only via server", !!fakeConn.error);
 }
 
+
+// Play Together: every move is validated by the database
+{
+  const mk = async (game, by = A) => {
+    const { data: id, error } = await by.c.rpc("game_create", { p_game: game });
+    if (error) throw error;
+    const acc = await (by === A ? L : A).c.rpc("game_accept", { p_room: id });
+    if (acc.error) throw acc.error;
+    return id;
+  };
+  const room = async (id) => (await A.c.from("game_rooms").select("*").eq("id", id).single()).data;
+  const who = (uid) => (uid === A.id ? A : L);
+  const mv = (p, id, move) => p.c.rpc("game_move", { p_room: id, p_move: move });
+
+  const direct = await A.c.from("game_rooms").insert({ game: "tictactoe", guest_id: L.id });
+  check("games: rooms cannot be inserted directly", !!direct.error);
+
+  // Tic Tac Toe
+  let id = await mk("tictactoe");
+  let r = await room(id);
+  const first = who(r.turn), second = first === A ? L : A;
+  check("tictactoe: other player cannot move first", !!(await mv(second, id, { cell: 0 })).error);
+  check("tictactoe: invalid cell rejected", !!(await mv(first, id, { cell: 9 })).error);
+  const forged = await first.c.from("game_rooms").update({ winner: first.id, status: "finished" }).eq("id", id).select();
+  check("games: board cannot be written directly", (forged.data ?? []).length === 0);
+  await mv(first, id, { cell: 0 });
+  check("tictactoe: occupied cell rejected", !!(await mv(second, id, { cell: 0 })).error);
+  await mv(second, id, { cell: 3 }); await mv(first, id, { cell: 1 }); await mv(second, id, { cell: 4 });
+  await mv(first, id, { cell: 2 });
+  r = await room(id);
+  check("tictactoe: three in a row wins", r.status === "finished" && r.winner === first.id && r.result === "win");
+  check("tictactoe: no moves after the end", !!(await mv(second, id, { cell: 8 })).error);
+  const { data: re } = await second.c.rpc("game_create", { p_game: "tictactoe", p_rematch_of: id });
+  const { data: re2 } = await first.c.rpc("game_create", { p_game: "tictactoe", p_rematch_of: id });
+  r = await room(re);
+  check("games: rematch from both sides joins one room", re === re2 && r.status === "active");
+  check("games: rematch swaps who starts", r.turn === second.id);
+
+  // Connect Four: vertical win
+  id = await mk("connect4");
+  r = await room(id);
+  let p1 = who(r.turn), p2 = p1 === A ? L : A;
+  for (let i = 0; i < 3; i++) { await mv(p1, id, { col: 3 }); await mv(p2, id, { col: 4 }); }
+  await mv(p1, id, { col: 3 });
+  r = await room(id);
+  check("connect4: four in a column wins", r.winner === p1.id && r.state.line.length >= 4);
+  id = await mk("connect4");
+  r = await room(id); p1 = who(r.turn); p2 = p1 === A ? L : A;
+  for (let i = 0; i < 6; i++) { const e = await mv(i % 2 ? p2 : p1, id, { col: 0 }); if (e.error) throw e.error; }
+  check("connect4: full column rejected", !!(await mv(p1, id, { col: 0 })).error);
+
+  // Memory: the deck is secret
+  id = await mk("memory");
+  r = await room(id);
+  check("memory: no card is visible at the start", r.state.cards.every((c) => c === null));
+  const sec = await A.c.from("game_secrets").select("*");
+  check("memory: deck is unreadable", !!sec.error || (sec.data ?? []).length === 0);
+  p1 = who(r.turn);
+  await mv(p1, id, { card: 0 });
+  check("memory: same card twice rejected", !!(await mv(p1, id, { card: 0 })).error);
+  await mv(p1, id, { card: 1 });
+  r = await room(id);
+  check("memory: flipped cards are revealed", r.state.cards[0] !== null && r.state.cards[1] !== null);
+
+  // Chess
+  id = await mk("chess");
+  r = await room(id);
+  const W = who(r.state.white), B = W === A ? L : A;
+  const sq = (n) => (8 - Number(n[1])) * 8 + n.charCodeAt(0) - 97;
+  const c = (p, f, t, promo) => mv(p, id, { from: sq(f), to: sq(t), ...(promo ? { promo } : {}) });
+  check("chess: illegal pawn jump rejected", !!(await c(W, "e2", "e5")).error);
+  check("chess: knight cannot move like a bishop", !!(await c(W, "g1", "e3")).error);
+  check("chess: black cannot move first", !!(await c(B, "e7", "e5")).error);
+  // Fool's mate
+  await c(W, "f2", "f3"); await c(B, "e7", "e5"); await c(W, "g2", "g4");
+  const mate = await c(B, "d8", "h4");
+  r = await room(id);
+  check("chess: fool's mate is checkmate", !mate.error && r.status === "finished" && r.winner === B.id && r.state.reason === "checkmate", mate.error?.message);
+  // Castling, en passant, pinned piece
+  id = await mk("chess");
+  r = await room(id);
+  const W2 = who(r.state.white), B2 = W2 === A ? L : A;
+  const c2 = (p, f, t, promo) => mv(p, id, { from: sq(f), to: sq(t), ...(promo ? { promo } : {}) });
+  for (const [p, f, t] of [[W2, "e2", "e4"], [B2, "a7", "a6"], [W2, "e4", "e5"], [B2, "d7", "d5"]]) await c2(p, f, t);
+  const ep = await c2(W2, "e5", "d6");
+  r = await room(id);
+  check("chess: en passant captures the pawn", !ep.error && r.state.board[sq("d5")] === "." && r.state.board[sq("d6")] === "P", ep.error?.message);
+  for (const [p, f, t] of [[B2, "a6", "a5"], [W2, "g1", "f3"], [B2, "a5", "a4"], [W2, "f1", "e2"], [B2, "a4", "a3"]]) await c2(p, f, t);
+  const castle = await c2(W2, "e1", "g1");
+  r = await room(id);
+  check("chess: short castling moves the rook", !castle.error && r.state.board[sq("f1")] === "R" && r.state.board[sq("g1")] === "K", castle.error?.message);
+  await c2(B2, "e7", "e6");
+  check("chess: cannot capture own piece", !!(await c2(W2, "d1", "e2")).error);
+  const draw = await mv(W2, id, { offer_draw: true });
+  const ans = await mv(B2, id, { answer_draw: true });
+  r = await room(id);
+  check("chess: draw by agreement", !draw.error && !ans.error && r.result === "draw");
+
+  // Reaction Battle: false starts and impossible times
+  id = await mk("reaction");
+  await mv(A, id, { ready: true }); await mv(L, id, { ready: true });
+  r = await room(id);
+  const early = await mv(A, id, { tap: true, ms: 150, round: 1 });
+  r = await room(id);
+  check("reaction: tapping before GO is a false start", !early.error && r.state.log[0]?.winner === L.id);
+  const wait = new Date(r.state.go_at).getTime() - Date.now() + 400;
+  await new Promise((res) => setTimeout(res, Math.max(0, wait)));
+  await mv(A, id, { tap: true, ms: 1, round: 2 });
+  await mv(L, id, { tap: true, ms: 250, round: 2 });
+  r = await room(id);
+  check("reaction: impossibly fast time counts as a false start", r.state.log[1]?.winner === L.id && r.state.log[1]?.taps[A.id] === -1);
+  check("reaction: stale round rejected", !!(await mv(A, id, { tap: true, ms: 300, round: 1 })).error);
+
+  // Couple Quiz: answers stay hidden until both answered
+  id = await mk("quiz");
+  await mv(A, id, { self: 1, guess: 2 });
+  r = await room(id);
+  const { data: log } = await L.c.from("game_moves").select("move").eq("room_id", id);
+  check("quiz: my answer is hidden from the partner", !JSON.stringify(r.state).includes('"self"') && !JSON.stringify(log).includes('"self"'));
+  check("quiz: cannot answer twice", !!(await mv(A, id, { self: 0, guess: 0 })).error);
+  await mv(L, id, { self: 2, guess: 1 });
+  r = await room(id);
+  check("quiz: both right guesses score", r.state.scores[A.id] === 1 && r.state.scores[L.id] === 1 && r.state.round === 1);
+
+  // Guess My Answer
+  id = await mk("guess");
+  r = await room(id);
+  const ans1 = who(r.state.answerer), gs1 = ans1 === A ? L : A;
+  await mv(ans1, id, { text: "Pizza" }); await mv(gs1, id, { text: "pizza!" });
+  check("guess: only the answerer judges", !!(await mv(gs1, id, { match: true })).error);
+  await mv(ans1, id, { match: true });
+  r = await room(id);
+  check("guess: judged guess scores for the guesser", r.state.scores[gs1.id] === 1 && r.state.answerer === gs1.id);
+
+  // Truth or Dare: only the partner confirms a dare
+  id = await mk("truthordare");
+  r = await room(id);
+  const act = who(r.turn), oth = act === A ? L : A;
+  await mv(act, id, { pick: "dare" });
+  check("truthordare: cannot confirm your own dare", !!(await mv(act, id, { done: true })).error);
+  await mv(oth, id, { done: true });
+  r = await room(id);
+  check("truthordare: confirmed dare scores", r.state.scores[act.id] === 1 && r.turn === oth.id);
+
+  // Date challenge & leaving
+  id = await mk("datechallenge");
+  await mv(A, id, { accept: true }); await mv(L, id, { accept: true });
+  check("datechallenge: cannot tick off twice", !(await mv(A, id, { done: true })).error && !!(await mv(A, id, { done: true })).error);
+  await mv(L, id, { done: true });
+  r = await room(id);
+  check("datechallenge: done together", r.result === "coop");
+
+  id = await mk("chess");
+  await A.c.rpc("game_leave", { p_room: id });
+  r = await room(id);
+  check("games: giving up hands the win to the partner", r.winner === L.id);
+  const { data: board } = await A.c.rpc("game_scoreboard");
+  check("games: scoreboard counts", (board ?? []).some((b) => b.game === "chess" && b.played >= 1));
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);

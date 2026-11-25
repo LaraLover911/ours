@@ -319,6 +319,46 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"game_content": {
+                  Row: {
+                    "body": NonNullable<Json>,"id": number,"kind": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": NonNullable<Json>,"id"?: never,"kind": string
+                  }
+                  Update: {
+                    "body"?: NonNullable<Json>,"id"?: never,"kind"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"game_moves": {
+                  Row: {
+                    "created_at": string,"id": number,"move": NonNullable<Json>,"player": string,"room_id": string,"seq": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: never,"move": NonNullable<Json>,"player": string,"room_id": string,"seq": number
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: never,"move"?: NonNullable<Json>,"player"?: string,"room_id"?: string,"seq"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "game_moves_player_fkey"
+      columns: ["player"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "game_moves_room_id_fkey"
+      columns: ["room_id"]
+isOneToOne: false
+      referencedRelation: "game_rooms"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"game_responses": {
                   Row: {
                     "created_at": string,"game": string,"prompt_key": string,"user_id": string,"value": string
@@ -339,6 +379,70 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"game_rooms": {
+                  Row: {
+                    "created_at": string,"created_by": string,"finished_at": string | null,"game": string,"guest_id": string,"id": string,"rematch_of": string | null,"result": string | null,"started_at": string | null,"state": NonNullable<Json>,"status": string,"turn": string | null,"updated_at": string,"version": number,"winner": string | null,"gm_end_by_score": {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            } | null,"gm_init": {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            } | null
+                  }
+                  ComputedFields: "gm_end_by_score" | "gm_init"
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"finished_at"?: string | null,"game": string,"guest_id": string,"id"?: string,"rematch_of"?: string | null,"result"?: string | null,"started_at"?: string | null,"state"?: NonNullable<Json>,"status"?: string,"turn"?: string | null,"updated_at"?: string,"version"?: number,"winner"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"finished_at"?: string | null,"game"?: string,"guest_id"?: string,"id"?: string,"rematch_of"?: string | null,"result"?: string | null,"started_at"?: string | null,"state"?: NonNullable<Json>,"status"?: string,"turn"?: string | null,"updated_at"?: string,"version"?: number,"winner"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "game_rooms_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "game_rooms_guest_id_fkey"
+      columns: ["guest_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "game_rooms_rematch_of_fkey"
+      columns: ["rematch_of"]
+isOneToOne: false
+      referencedRelation: "game_rooms"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"game_scores": {
                   Row: {
                     "created_at": string,"game": string,"id": string,"score": number,"total": number,"user_id": string
@@ -356,6 +460,26 @@ isOneToOne: false
       columns: ["user_id"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"game_secrets": {
+                  Row: {
+                    "data": NonNullable<Json>,"room_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "data"?: NonNullable<Json>,"room_id": string
+                  }
+                  Update: {
+                    "data"?: NonNullable<Json>,"room_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "game_secrets_room_id_fkey"
+      columns: ["room_id"]
+isOneToOne: true
+      referencedRelation: "game_rooms"
       referencedColumns: ["id"]
     }
                   ]
@@ -807,6 +931,27 @@ isOneToOne: false
 "call_set_status":
 { Args: { "call_id": string,"next_status": string,"reason"?: string }; Returns: string
                            },
+"chess_any_legal":
+{ Args: { "b": string,"castling": string,"ep": number,"white": boolean }; Returns: boolean
+                           },
+"chess_apply":
+{ Args: { "b": string,"ep": number,"fsq": number,"promo": string,"tsq": number }; Returns: string
+                           },
+"chess_attacked":
+{ Args: { "b": string,"by_white": boolean,"sq": number }; Returns: boolean
+                           },
+"chess_legal":
+{ Args: { "b": string,"castling": string,"ep": number,"fsq": number,"tsq": number,"white": boolean }; Returns: boolean
+                           },
+"chess_name":
+{ Args: { "sq": number }; Returns: string
+                           },
+"chess_sq":
+{ Args: { "b": string,"c": number,"r": number }; Returns: string
+                           },
+"chess_targets":
+{ Args: { "b": string,"castling": string,"ep": number,"fsq": number }; Returns: (number)[]
+                           },
 "device_end":
 { Args: { "device_id": string }; Returns: undefined
                            },
@@ -818,14 +963,364 @@ isOneToOne: false
               "app_version": string,"battery_charging": boolean,"battery_level": number,"browser": string,"browser_version": string,"connection": string,"created_at": string,"device_type": string,"id": string,"last_heartbeat_at": string,"mine": boolean,"name": string,"online": boolean,"os": string,"os_version": string,"pwa": boolean,"screen": string,"server_time": string,"share": Json,"user_id": string,"viewport": string
             }[]
                            },
+"game_accept":
+{ Args: { "p_room": string }; Returns: Json
+                           },
+"game_clock":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "game_counterpart":
 { Args: { "g": string }; Returns: string
+                           },
+"game_create":
+{ Args: { "p_game": string,"p_rematch_of"?: string }; Returns: string
+                           },
+"game_leave":
+{ Args: { "p_room": string }; Returns: Json
+                           },
+"game_move":
+{ Args: { "p_move": Json,"p_room": string }; Returns: Json
                            },
 "game_progress":
 { Args: Record<PropertyKey, never>; Returns: {
               "game": string,"prompt_key": string,"user_id": string
             }[]
                            },
+"game_scoreboard":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "draws": number,"game": string,"played": number,"user_id": string,"wins": number
+            }[]
+                           },
+"gm_add_score":
+{ Args: { "n"?: number,"s": Json,"uid": string }; Returns: Json
+                           },
+"gm_draw":
+{ Args: { "content_kind": string,"n": number,"not_in"?: (number)[] }; Returns: Json
+                           },
+"gm_end":
+{ Args: { "r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']>,"res": string,"who": string }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gm_end_by_score":
+{ Args: { "r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "game_rooms"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gm_init":
+{ Args: { "r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "game_rooms"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gm_int":
+{ Args: { "k": string,"m": Json }; Returns: number
+                           },
+"gm_other":
+{ Args: { "r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']>,"uid": string }; Returns: string
+                           },
+"gm_save":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: Json
+                           },
+"gm_submit":
+{ Args: { "answer": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: Json
+                           },
+"gp_chess":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_connect4":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_datechallenge":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_guess":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_memory":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_quiz":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_reaction":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_thisorthat":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_tictactoe":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"gp_truthordare":
+{ Args: { "m": Json,"me": string,"r": Omit<Database["public"]['Tables']["game_rooms"]['Row'], Database["public"]['Tables']["game_rooms"]['ComputedFields']> }; Returns: {
+              "created_at": string,
+"created_by": string,
+"finished_at": string | null,
+"game": string,
+"guest_id": string,
+"id": string,
+"rematch_of": string | null,
+"result": string | null,
+"started_at": string | null,
+"state": NonNullable<Json>,
+"status": string,
+"turn": string | null,
+"updated_at": string,
+"version": number,
+"winner": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "game_rooms"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "has_answered":
 { Args: { "q_day": string,"q_id": number }; Returns: boolean
                            },
