@@ -19,7 +19,8 @@ import { Reveal } from "@/components/animations/reveal";
 import { must, useQuery } from "@/hooks/use-query";
 import { useRealtimeRefetch } from "@/hooks/use-realtime-refetch";
 import { cn } from "@/lib/utils";
-import { formatDate, nextAnniversary, nextMonthsary, relativeDay, timeAgo } from "@/lib/utils/dates";
+import { formatDate, nextAnniversary, nextMonthsary, relativeDay } from "@/lib/utils/dates";
+import { PRESENCE_DOT, usePresence } from "@/hooks/use-presence";
 import { DashboardTopBar, Hero } from "./hero";
 import { LoveCounter, SetStartDate } from "./love-counter";
 import { StatusCards } from "./status-cards";
@@ -190,7 +191,8 @@ function CountdownCard({ idea }: { idea: { id: string; title: string; planned_fo
 }
 
 export function Dashboard() {
-  const { me, partner, profiles, partnerOnline, unreadTotal, typing } = useApp();
+  const { me, partner, profiles, unreadTotal, typing } = useApp();
+  const presence = usePresence();
   const { data, loading } = useDashboardData();
   const iAnswered = data?.progress.some((p) => p.user_id === me.id);
   const partnerAnswered = data?.progress.some((p) => p.user_id === partner?.id);
@@ -272,8 +274,8 @@ export function Dashboard() {
             )}
             <div className="mt-auto flex items-center justify-between gap-2 pt-5 text-[13px] text-muted-foreground">
               <span className="flex items-center gap-2">
-                <span className={cn("size-2 rounded-full", partnerOnline ? "bg-[#4fbf7f]" : "bg-border-strong")} />
-                {partnerTyping ? `${partner?.display_name} tippt gerade…` : partnerOnline ? `${partner?.display_name} ist online` : partner?.last_seen_at ? `zuletzt ${timeAgo(partner.last_seen_at)}` : "offline"}
+                <span className={cn("size-2 rounded-full", PRESENCE_DOT[presence.tone])} />
+                {partnerTyping ? `${partner?.display_name} tippt gerade…` : `${partner?.display_name} ${presence.label}`}
               </span>
               {data?.lastMessage ? <span>{relativeDay(data.lastMessage.created_at)}</span> : null}
             </div>

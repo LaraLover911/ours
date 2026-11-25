@@ -19,3 +19,13 @@ export function getDeviceId(): string {
     return memoryId;
   }
 }
+
+/** After this device was signed out remotely it gets a new id on the next login. */
+export function resetDeviceId() {
+  memoryId = null;
+  try {
+    localStorage.removeItem("ours-device-id");
+  } catch {
+    /* ignore */
+  }
+}

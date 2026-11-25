@@ -8,8 +8,8 @@ import { useCall } from "@/components/call/call-provider";
 import { Avatar } from "@/components/shared/avatar";
 import { Button } from "@/components/ui/button";
 import { useNow } from "@/hooks/use-now";
-import { berlinDateString, timeAgo } from "@/lib/utils/dates";
-import { parseActivity } from "@/lib/activity";
+import { berlinDateString, formatTime } from "@/lib/utils/dates";
+import { PRESENCE_DOT, usePresence } from "@/hooks/use-presence";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/app";
 
@@ -21,6 +21,7 @@ function thoughtOfToday(p: Profile | null | undefined) {
 
 export function StatusCards() {
   const { me, partner, partnerOnline, updateMe } = useApp();
+  const presence = usePresence();
   const { startCall, busy } = useCall();
   useNow(30_000); // keep "vor 3 Minuten" fresh
   const partnerThought = thoughtOfToday(partner);
@@ -28,13 +29,6 @@ export function StatusCards() {
   const [draft, setDraft] = React.useState(myThought ?? "");
   const [saving, setSaving] = React.useState(false);
 
-  const act = parseActivity(partner?.last_activity);
-  const lastAt = partner?.last_activity_at ?? partner?.last_seen_at;
-  const activity = partnerOnline
-    ? (act?.doing ?? "ist gerade da")
-    : lastAt
-      ? `zuletzt aktiv ${timeAgo(lastAt)}${act ? ` · ${act.place}` : ""}`
-      : "war noch nicht hier";
 
   async function saveThought(e: React.FormEvent) {
     e.preventDefault();
@@ -55,9 +49,12 @@ export function StatusCards() {
             <p className="eyebrow">right now</p>
             <p className="font-display truncate text-3xl leading-tight">{partner?.display_name ?? "…"}</p>
             <p className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-              <span className={cn("size-2 shrink-0 rounded-full", partnerOnline ? "bg-[#4fbf7f]" : "bg-border-strong")} />
-              <span className="truncate">{activity}</span>
+              <span className={cn("size-2 shrink-0 rounded-full", PRESENCE_DOT[presence.tone])} />
+              <span className="truncate">{presence.label}</span>
             </p>
+            {presence.online && presence.lastActivityAt ? (
+              <p className="text-[12px] text-muted-foreground/80">letzte Aktivität {formatTime(presence.lastActivityAt)} Uhr</p>
+            ) : null}
           </div>
           {partner ? (
             <div className="flex shrink-0 gap-1.5">

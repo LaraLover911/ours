@@ -233,6 +233,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"device_sessions": {
+                  Row: {
+                    "app_version": string | null,"battery_charging": boolean | null,"battery_level": number | null,"browser": string | null,"browser_version": string | null,"connection": string | null,"created_at": string,"device_type": string,"ended_at": string | null,"id": string,"last_heartbeat_at": string,"name": string,"os": string | null,"os_version": string | null,"pwa": boolean | null,"screen": string | null,"share": NonNullable<Json>,"user_id": string,"viewport": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "app_version"?: string | null,"battery_charging"?: boolean | null,"battery_level"?: number | null,"browser"?: string | null,"browser_version"?: string | null,"connection"?: string | null,"created_at"?: string,"device_type"?: string,"ended_at"?: string | null,"id": string,"last_heartbeat_at"?: string,"name"?: string,"os"?: string | null,"os_version"?: string | null,"pwa"?: boolean | null,"screen"?: string | null,"share"?: NonNullable<Json>,"user_id"?: string,"viewport"?: string | null
+                  }
+                  Update: {
+                    "app_version"?: string | null,"battery_charging"?: boolean | null,"battery_level"?: number | null,"browser"?: string | null,"browser_version"?: string | null,"connection"?: string | null,"created_at"?: string,"device_type"?: string,"ended_at"?: string | null,"id"?: string,"last_heartbeat_at"?: string,"name"?: string,"os"?: string | null,"os_version"?: string | null,"pwa"?: boolean | null,"screen"?: string | null,"share"?: NonNullable<Json>,"user_id"?: string,"viewport"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "device_sessions_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"diary_comments": {
                   Row: {
                     "author_id": string,"body": string,"created_at": string,"entry_id": string,"id": string
@@ -517,14 +537,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "accent": string,"avatar_path": string | null,"bio": string | null,"created_at": string,"display_name": string,"id": string,"last_activity": string | null,"last_activity_at": string | null,"last_seen_at": string | null,"notify_messages": boolean,"read_receipts": boolean,"role": string,"show_online": boolean,"theme": string,"today_thought": string | null,"today_thought_at": string | null,"updated_at": string
+                    "accent": string,"avatar_path": string | null,"bio": string | null,"created_at": string,"display_name": string,"id": string,"last_activity": string | null,"last_activity_at": string | null,"last_seen_at": string | null,"notify_messages": boolean,"read_receipts": boolean,"role": string,"share_activity": boolean,"show_online": boolean,"theme": string,"today_thought": string | null,"today_thought_at": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name": string,"id": string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role": string,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
+                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name": string,"id": string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role": string,"share_activity"?: boolean,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string,"id"?: string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role"?: string,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
+                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string,"id"?: string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role"?: string,"share_activity"?: boolean,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -652,6 +672,17 @@ isOneToOne: false
                            },
 "call_set_status":
 { Args: { "call_id": string,"next_status": string,"reason"?: string }; Returns: string
+                           },
+"device_end":
+{ Args: { "device_id": string }; Returns: undefined
+                           },
+"device_heartbeat":
+{ Args: { "info": Json }; Returns: Json
+                           },
+"devices_overview":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "app_version": string,"battery_charging": boolean,"battery_level": number,"browser": string,"browser_version": string,"connection": string,"created_at": string,"device_type": string,"id": string,"last_heartbeat_at": string,"mine": boolean,"name": string,"online": boolean,"os": string,"os_version": string,"pwa": boolean,"screen": string,"server_time": string,"share": Json,"user_id": string,"viewport": string
+            }[]
                            },
 "game_counterpart":
 { Args: { "g": string }; Returns: string

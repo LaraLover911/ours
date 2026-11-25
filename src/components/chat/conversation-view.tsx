@@ -6,7 +6,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowDown, ChevronLeft, Copy, CornerUpLeft, Pencil, Phone, Search, Trash2, Video, X } from "lucide-react";
 import { useCall } from "@/components/call/call-provider";
 import { toast } from "sonner";
-import { useApp } from "@/components/providers/app-provider";
+import { useApp, useRealtimeActivity } from "@/components/providers/app-provider";
+import { usePresence } from "@/hooks/use-presence";
 import { Avatar } from "@/components/shared/avatar";
 import { HeartGlyph } from "@/components/shared/heart";
 import { ErrorState, Spinner } from "@/components/shared/states";
@@ -15,7 +16,7 @@ import { Dialog, DialogBody, DialogContent, DialogTitle } from "@/components/ui/
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { berlinDateString, formatTime, relativeDay, timeAgo } from "@/lib/utils/dates";
+import { berlinDateString, formatTime, relativeDay } from "@/lib/utils/dates";
 import { REACTION_EMOJIS } from "@/lib/constants";
 import type { Conversation, Message } from "@/types/app";
 import { Composer } from "./composer";
@@ -98,6 +99,8 @@ function ChatSearch({ conversationId, onPick, onClose }: { conversationId: strin
 
 export function ConversationView({ conversation, showBack }: { conversation: Conversation; showBack: boolean }) {
   const { supabase, me, partner, partnerOnline, typing, nameOf } = useApp();
+  const presence = usePresence();
+  useRealtimeActivity("chat");
   const router = useRouter();
   const params = useSearchParams();
   const c = useConversation(conversation.id);
@@ -235,13 +238,7 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
   const onOpenMedia = React.useCallback((m: ChatMessage) => setLightbox(media.findIndex((x) => x.id === m.id)), [media]);
   const onReact = c.toggleReaction;
 
-  const status = partnerTyping
-    ? `${partner?.display_name ?? ""} tippt gerade…`
-    : partnerOnline
-      ? "online"
-      : partner?.last_seen_at && partner.show_online
-        ? `zuletzt online ${timeAgo(partner.last_seen_at)}`
-        : "just us";
+  const status = partnerTyping ? `${partner?.display_name ?? ""} tippt gerade…` : presence.online ? (presence.activity === "chat" ? "ist im Chat" : presence.label) : presence.label;
 
   return (
     <section aria-label={`Chat: ${conversation.title}`} className="relative flex h-full min-h-0 flex-col bg-background">

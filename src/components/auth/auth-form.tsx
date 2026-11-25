@@ -64,7 +64,9 @@ function Heading({ eyebrow, title, text }: { eyebrow: string; title: React.React
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const [error, setError] = React.useState<string | null>(params.get("error"));
+  const [error, setError] = React.useState<string | null>(
+    params.get("ended") ? "Dieses Gerät wurde von deinem anderen Gerät aus abgemeldet." : params.get("error"),
+  );
   const [pending, setPending] = React.useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {

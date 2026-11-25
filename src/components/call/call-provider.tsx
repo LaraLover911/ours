@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { useApp } from "@/components/providers/app-provider";
+import { useApp, useRealtimeActivity } from "@/components/providers/app-provider";
 import { getDeviceId } from "@/lib/device";
 import { CallEngine, IDLE_SNAPSHOT, type CallKind, type CallSnapshot } from "./engine";
 import { CallScreen } from "./call-screen";
@@ -80,6 +80,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const state = React.useSyncExternalStore(engine?.subscribe ?? noopSubscribe, engine?.getSnapshot ?? idle, idle);
   const debug = React.useSyncExternalStore(noopSubscribe, readDebugFlag, () => false);
+  useRealtimeActivity("call", state.phase === "active" || state.phase === "reconnecting" || state.phase === "connecting");
   const canShareScreen = React.useSyncExternalStore(noopSubscribe, CallEngine.canShareScreen, () => false);
 
   const value = React.useMemo<CallContextValue>(
