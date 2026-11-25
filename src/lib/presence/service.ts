@@ -324,6 +324,11 @@ export class PresenceService {
       }
       const t0 = Date.now();
       const { data, error } = await this.o.supabase.rpc("device_heartbeat", { info });
+      if (error?.code === "PGRST202") {
+        // Database not updated yet: keep "last seen" working the old way.
+        if (this.shareOnline) await this.o.supabase.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", this.o.meId);
+        return;
+      }
       if (error || !data) return;
       const res = data as { ended?: boolean; server_time?: string };
       if (res.ended) {

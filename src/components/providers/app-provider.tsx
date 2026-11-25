@@ -148,7 +148,7 @@ export function AppProvider({
   }, [presenceService]);
   const presence = React.useSyncExternalStore(presenceService?.subscribe ?? noopSubscribe, presenceService?.getSnapshot ?? emptyPresence, emptyPresence);
   React.useEffect(() => {
-    presenceService?.setSharing(me.show_online, me.share_activity);
+    presenceService?.setSharing(me.show_online, me.share_activity ?? true);
   }, [presenceService, me.show_online, me.share_activity]);
   React.useEffect(() => {
     presenceService?.setPlace(activityFor(pathname));
@@ -220,7 +220,7 @@ export function AppProvider({
 
   // Last activity: what page each of us is on (only when online status is shared).
   React.useEffect(() => {
-    if (!meRef.current.show_online || !meRef.current.share_activity) return;
+    if (!meRef.current.show_online || meRef.current.share_activity === false) return;
     const t = window.setTimeout(() => {
       void supabase
         .from("profiles")

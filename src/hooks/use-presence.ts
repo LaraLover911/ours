@@ -17,7 +17,7 @@ export function usePresence() {
   const { partner, partnerPresence: p } = useApp();
   const name = partner?.display_name ?? "Dein Schatz";
   const lastSeenAt = partner?.show_online ? partner.last_seen_at : null;
-  const act = partner?.share_activity ? parseActivity(partner?.last_activity) : null;
+  const act = partner?.share_activity !== false ? parseActivity(partner?.last_activity) : null;
   let label: string;
   if (!p.online) {
     label = lastSeenAt ? `zuletzt online ${timeAgo(lastSeenAt)}${act ? ` · ${act.place}` : ""}` : partner?.show_online === false ? "Online-Status verborgen" : "offline";
@@ -32,7 +32,7 @@ export function usePresence() {
   }
   if (p.online && p.devices > 1) label += ` · auf ${p.devices} Geräten`;
   const tone: "online" | "idle" | "offline" = !p.online ? "offline" : p.state === "online" ? "online" : "idle";
-  return { ...p, name, label, tone, lastSeenAt, lastActivityAt: partner?.share_activity ? (partner?.last_activity_at ?? null) : null };
+  return { ...p, name, label, tone, lastSeenAt, lastActivityAt: partner?.share_activity !== false ? (partner?.last_activity_at ?? null) : null };
 }
 
 export const PRESENCE_DOT: Record<"online" | "idle" | "offline", string> = {
