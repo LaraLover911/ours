@@ -24,6 +24,10 @@ Die App erfindet nichts: keine gemeinsamen Erinnerungen, keine Daten und keine F
 | **Mini Games** | How well do you know me?, Who is more likely to?, This or That, Couple Quiz, Guess the Memory, Random Date Generator. Antworten werden gespeichert und synchronisiert. |
 | **Music** | Gemeinsame Spotify-Playlist (offizieller Embed), Songs mit Widmung. Es wird keine Musik illegal abgespielt. |
 | **Surprises** | Geschenke, Nachrichten und versteckte Überraschungen mit Timer und Geschenkpapier-Animation. |
+| **Studio** | Geheime Überraschungen für den anderen: Jumpscare (mit eigenem Gruselbild/-video oder eingebautem Gesicht und synthetischem Schrei), Video, Foto oder Nachricht. Sie erscheinen im Vollbild, sobald der andere ours. das nächste Mal öffnet. Zuerst kommt eine harmlose Karte („Ich hab dir was Süßes geschickt 💌“), der Tipp darauf startet den Ton. Im Studio siehst du, wann es gesehen wurde. |
+| **Clips** | Eigener Video-Feed wie TikTok: Hochformat-Videos hochladen (bis 50 MB), vertikal durchwischen, Autoplay, Ton an/aus, Doppeltipp = Herz, Likes in Echtzeit. |
+| **Anrufe** | Video- und Sprachanrufe direkt im Browser (WebRTC, Ende-zu-Ende verschlüsselt): Klingeln, Annehmen/Ablehnen, Stummschalten, Kamera aus, Kamera wechseln. Bis 1080p, Opus-Audio mit 128 kbit/s. Anrufen über Home oder den Chat. |
+| **Status** | „Heute denke ich…“ (gilt nur für den Tag) und letzte Aktivität des anderen („schaut Clips“, „zuletzt aktiv vor 5 Minuten · Chat“). Respektiert die Einstellung „Online-Status zeigen“. |
 | **Settings** | Profil, Profilbild, Startdatum, Hero-/Hintergrundbild, Farben, Hell/Dunkel, Benachrichtigungen, Privatsphäre, Konto. |
 
 Dazu: Mobile-first, Safe Areas fürs iPhone, Bottom-Navigation, die Tastatur verdeckt den Chat nicht, „Reduzierte Bewegung“ wird respektiert, Hell- und Dunkelmodus, installierbar als App (Manifest und Icons).
@@ -145,6 +149,9 @@ Es gibt zwei Wege, und beide bleiben privat:
 Ohne Fotos zeigt die App überall schöne Platzhalter.
 
 ## Ehrliche Grenzen
+
+- **Anrufe** laufen direkt zwischen euren Geräten. In den meisten WLANs und Mobilnetzen klappt das sofort. Manche Netze (z. B. Firmen-WLAN oder bestimmte Mobilfunkanbieter) blockieren direkte Verbindungen, dann bricht der Anruf mit „Verbindung fehlgeschlagen“ ab. Dagegen hilft ein TURN-Server (z. B. von Cloudflare, Twilio oder Metered). Dessen Zugangsdaten trägst du in Vercel als `NEXT_PUBLIC_TURN_URLS` (kommagetrennt, z. B. `turn:turn.example.com:3478,turns:turn.example.com:5349`), `NEXT_PUBLIC_TURN_USERNAME` und `NEXT_PUBLIC_TURN_CREDENTIAL` ein. Die Bildqualität passt sich automatisch an eure Verbindung an. Angerufen werden kann nur, wenn ours. beim anderen gerade offen ist.
+- **Jumpscare-Ton:** Browser erlauben Ton erst nach einem Tipp. Deshalb kommt zuerst die harmlose Karte.
 
 - **Benachrichtigungen** kommen, solange ours. in einem Tab oder als installierte App geöffnet ist. Echte Push-Nachrichten bei komplett geschlossener App bräuchten zusätzlich einen Push-Dienst mit Server-Schlüssel und sind bewusst nicht eingebaut.
 - **Spotify:** Die App bettet nur den offiziellen Spotify-Player ein. Ob ganze Songs laufen, hängt von eurem Spotify-Konto ab.

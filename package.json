@@ -14,7 +14,7 @@
     "postinstall": "node scripts/build-photos.mjs",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > src/types/database.ts",
+    "db:types": "supabase gen types typescript --local > src/types/database.tmp && mv src/types/database.tmp src/types/database.ts",
     "test:db": "node scripts/test-db.mjs"
   },
   "dependencies": {

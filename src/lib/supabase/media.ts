@@ -59,7 +59,7 @@ export function getSignedUrl(path: string): Promise<string | null> {
 /* ------------------------------------------------------------------ */
 /* Uploads                                                            */
 /* ------------------------------------------------------------------ */
-export type UploadArea = "chat" | "memories" | "diary" | "letters" | "surprises" | "avatars" | "backgrounds";
+export type UploadArea = "chat" | "memories" | "diary" | "letters" | "surprises" | "avatars" | "backgrounds" | "clips" | "studio";
 
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif", "image/avif"];

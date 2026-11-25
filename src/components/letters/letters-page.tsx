@@ -128,7 +128,7 @@ function LetterReader({ letter, onClose, onEdit, onDelete }: { letter: LoveLette
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t1 = window.setTimeout(() => setStageFor({ id: letter.id, stage: reduced ? "open" : "opening" }), reduced ? 0 : 250);
     const t2 = window.setTimeout(() => setStageFor({ id: letter.id, stage: "open" }), reduced ? 0 : 1500);
-    if (letter.author_id !== me.id && !letter.opened_at) void supabase.rpc("mark_letter_opened", { letter_id: letter.id });
+    if (letter.author_id !== me.id && !letter.opened_at) void supabase.rpc("mark_letter_opened", { letter_id: letter.id }).then();
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);

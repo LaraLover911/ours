@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowDown, ChevronLeft, Copy, CornerUpLeft, Pencil, Search, Trash2, X } from "lucide-react";
+import { ArrowDown, ChevronLeft, Copy, CornerUpLeft, Pencil, Phone, Search, Trash2, Video, X } from "lucide-react";
+import { useCall } from "@/components/call/call-provider";
 import { toast } from "sonner";
 import { useApp } from "@/components/providers/app-provider";
 import { Avatar } from "@/components/shared/avatar";
@@ -106,6 +107,7 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
   const [editing, setEditing] = React.useState<ChatMessage | null>(null);
   const [actionsFor, setActionsFor] = React.useState<ChatMessage | null>(null);
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const { startCall, busy: callBusy } = useCall();
   const [highlight, setHighlight] = React.useState<string | null>(null);
   const [atBottom, setAtBottom] = React.useState(true);
   const [newBelow, setNewBelow] = React.useState(0);
@@ -260,6 +262,12 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
             {status}
           </p>
         </div>
+        <button onClick={() => startCall("audio")} disabled={callBusy} className="grid size-11 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40" aria-label="Anrufen">
+          <Phone className="size-5" />
+        </button>
+        <button onClick={() => startCall("video")} disabled={callBusy} className="grid size-11 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40" aria-label="Videoanruf">
+          <Video className="size-5" />
+        </button>
         <button onClick={() => setSearchOpen((s) => !s)} className="grid size-11 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Im Chat suchen" aria-expanded={searchOpen}>
           <Search className="size-5" />
         </button>

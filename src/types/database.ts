@@ -23,7 +23,53 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "conversation_reads": {
+            "clip_likes": {
+                  Row: {
+                    "clip_id": string,"created_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "clip_id": string,"created_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "clip_id"?: string,"created_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "clip_likes_clip_id_fkey"
+      columns: ["clip_id"]
+isOneToOne: false
+      referencedRelation: "clips"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "clip_likes_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"clips": {
+                  Row: {
+                    "author_id": string,"caption": string | null,"created_at": string,"duration": number | null,"height": number | null,"id": string,"video_path": string,"width": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string,"caption"?: string | null,"created_at"?: string,"duration"?: number | null,"height"?: number | null,"id"?: string,"video_path": string,"width"?: number | null
+                  }
+                  Update: {
+                    "author_id"?: string,"caption"?: string | null,"created_at"?: string,"duration"?: number | null,"height"?: number | null,"id"?: string,"video_path"?: string,"width"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "clips_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"conversation_reads": {
                   Row: {
                     "conversation_id": string,"last_read_at": string,"user_id": string
                   }
@@ -417,16 +463,42 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"profiles": {
+                },"pops": {
                   Row: {
-                    "accent": string,"avatar_path": string | null,"bio": string | null,"created_at": string,"display_name": string,"id": string,"last_seen_at": string | null,"notify_messages": boolean,"read_receipts": boolean,"role": string,"show_online": boolean,"theme": string,"updated_at": string
+                    "body": string | null,"created_at": string,"id": string,"kind": string,"media_path": string | null,"recipient_id": string,"scream": boolean,"sender_id": string,"shown_at": string | null,"teaser": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name": string,"id": string,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role": string,"show_online"?: boolean,"theme"?: string,"updated_at"?: string
+                    "body"?: string | null,"created_at"?: string,"id"?: string,"kind": string,"media_path"?: string | null,"recipient_id": string,"scream"?: boolean,"sender_id"?: string,"shown_at"?: string | null,"teaser"?: string | null
                   }
                   Update: {
-                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string,"id"?: string,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role"?: string,"show_online"?: boolean,"theme"?: string,"updated_at"?: string
+                    "body"?: string | null,"created_at"?: string,"id"?: string,"kind"?: string,"media_path"?: string | null,"recipient_id"?: string,"scream"?: boolean,"sender_id"?: string,"shown_at"?: string | null,"teaser"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pops_recipient_id_fkey"
+      columns: ["recipient_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pops_sender_id_fkey"
+      columns: ["sender_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"profiles": {
+                  Row: {
+                    "accent": string,"avatar_path": string | null,"bio": string | null,"created_at": string,"display_name": string,"id": string,"last_activity": string | null,"last_activity_at": string | null,"last_seen_at": string | null,"notify_messages": boolean,"read_receipts": boolean,"role": string,"show_online": boolean,"theme": string,"today_thought": string | null,"today_thought_at": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name": string,"id": string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role": string,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string,"id"?: string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role"?: string,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -571,6 +643,9 @@ isOneToOne: false
                            },
 "mark_letter_opened":
 { Args: { "letter_id": string }; Returns: undefined
+                           },
+"mark_pop_shown":
+{ Args: { "pop_id": string }; Returns: undefined
                            },
 "mark_surprise_opened":
 { Args: { "surprise_id": string }; Returns: undefined

@@ -5,6 +5,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { usePathname } from "next/navigation";
 import { getSupabaseBrowserClient, type TypedClient } from "@/lib/supabase/client";
 import type { CoupleSettings, Profile, Update } from "@/types/app";
+import { activityFor } from "@/lib/activity";
 
 type TypingState = Record<string, { userId: string; at: number } | undefined>;
 
@@ -196,13 +197,26 @@ export function AppProvider({
   React.useEffect(() => {
     const beat = () => {
       if (document.visibilityState === "visible" && meRef.current.show_online) {
-        void supabase.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", meRef.current.id);
+        void supabase.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", meRef.current.id).then();
       }
     };
     beat();
     const id = window.setInterval(beat, 60_000);
     return () => window.clearInterval(id);
   }, [supabase]);
+
+  // Last activity: what page each of us is on (only when online status is shared).
+  React.useEffect(() => {
+    if (!meRef.current.show_online) return;
+    const t = window.setTimeout(() => {
+      void supabase
+        .from("profiles")
+        .update({ last_activity: activityFor(pathname), last_activity_at: new Date().toISOString() })
+        .eq("id", meRef.current.id)
+        .then(); // query builders are lazy: .then() sends the request
+    }, 800);
+    return () => window.clearTimeout(t);
+  }, [supabase, pathname]);
 
   // Clear stale typing indicators.
   React.useEffect(() => {

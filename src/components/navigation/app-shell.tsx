@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
+import { CallProvider } from "@/components/call/call-provider";
+import { PopDelivery } from "@/components/pops/pop-delivery";
 import { LogOut, MoreHorizontal } from "lucide-react";
 import { useApp } from "@/components/providers/app-provider";
 import { Avatar } from "@/components/shared/avatar";
@@ -204,14 +206,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const inConversation = /^\/chat\/[^/]+/.test(pathname);
 
   const { settings } = useApp();
+  const fullBleed = pathname.startsWith("/chat") || pathname.startsWith("/clips");
   return (
+    <CallProvider>
     <div className="flex min-h-dvh">
       {settings.background_image ? (
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 opacity-[0.10] blur-[2px] saturate-[0.8] dark:opacity-[0.07]">
           <PhotoRefImage value={settings.background_image} className="absolute inset-0" sizes="100vw" />
         </div>
       ) : null}
-      <SmoothScroll disabled={pathname.startsWith("/chat")} />
+      <SmoothScroll disabled={fullBleed} />
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-card focus:px-3 focus:py-2">
         Zum Inhalt springen
       </a>
@@ -222,7 +226,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             key={pathname.startsWith("/chat") ? "/chat" : pathname}
             className={cn(
               "animate-page-in min-w-0",
-              !pathname.startsWith("/chat") && "pb-[calc(var(--bottom-nav-h)+var(--safe-bottom)+1.5rem)] lg:pb-12",
+              !fullBleed && "pb-[calc(var(--bottom-nav-h)+var(--safe-bottom)+1.5rem)] lg:pb-12",
             )}
           >
             {children}
@@ -230,6 +234,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
       <MobileNav hidden={inConversation} />
     </div>
+    <PopDelivery />
+    </CallProvider>
   );
 }
 

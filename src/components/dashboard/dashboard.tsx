@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { formatDate, nextAnniversary, nextMonthsary, relativeDay, timeAgo } from "@/lib/utils/dates";
 import { DashboardTopBar, Hero } from "./hero";
 import { LoveCounter, SetStartDate } from "./love-counter";
+import { StatusCards } from "./status-cards";
 import { HiddenSurprises } from "@/components/surprises/hidden-surprises";
 import type { Message } from "@/types/app";
 
@@ -203,6 +204,9 @@ export function Dashboard() {
       <HiddenSurprises />
 
       <Reveal className="mt-10 grid gap-4 md:mt-14 md:grid-cols-6" stagger={0.07}>
+        <div className="md:col-span-6">
+          <StatusCards />
+        </div>
         <div data-reveal className="md:col-span-6">
           <LoveCounter />
         </div>

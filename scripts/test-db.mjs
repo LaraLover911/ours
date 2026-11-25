@@ -163,5 +163,43 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("answer revealed after guessing", reveal?.[0]?.value === "pizza");
 }
 
+// Studio pops
+{
+  const self = await A.c.from("pops").insert({ recipient_id: A.id, kind: "message", body: "hi" });
+  check("pop: cannot send to yourself", !!self.error);
+  const { data: pop, error } = await A.c.from("pops").insert({ recipient_id: L.id, kind: "jumpscare", teaser: "💌" }).select().single();
+  check("pop: send to partner", !error && pop, error?.message);
+  const { data: pending } = await L.c.from("pops").select("id").eq("recipient_id", L.id).is("shown_at", null);
+  check("pop: recipient sees pending pop", pending?.some((p) => p.id === pop.id));
+  const upd = await L.c.from("pops").update({ body: "changed" }).eq("id", pop.id).select();
+  check("pop: recipient cannot edit pop", !!upd.error || (upd.data ?? []).length === 0);
+  await L.c.rpc("mark_pop_shown", { pop_id: pop.id });
+  const { data: seen } = await A.c.from("pops").select("shown_at").eq("id", pop.id).single();
+  check("pop: sender sees when it was shown", !!seen?.shown_at);
+  const noVideo = await A.c.from("pops").insert({ recipient_id: L.id, kind: "video" });
+  check("pop: video needs a file", !!noVideo.error);
+}
+
+// Clips
+{
+  const { data: clip, error } = await A.c.from("clips").insert({ video_path: `${A.id}/clips/x.mp4`, caption: "hi" }).select().single();
+  check("clip: post", !error && clip, error?.message);
+  const spoof = await L.c.from("clips").insert({ author_id: A.id, video_path: `${A.id}/clips/y.mp4` });
+  check("clip: cannot post as partner", !!spoof.error);
+  const like = await L.c.from("clip_likes").insert({ clip_id: clip.id });
+  check("clip: partner likes", !like.error, like.error?.message);
+  const del = await L.c.from("clips").delete().eq("id", clip.id).select();
+  check("clip: partner cannot delete", (del.data ?? []).length === 0);
+  await A.c.from("clips").delete().eq("id", clip.id);
+}
+
+// Status of the day
+{
+  const t = await L.c.from("profiles").update({ today_thought: "miss you", today_thought_at: new Date().toISOString(), last_activity: "im Chat", last_activity_at: new Date().toISOString() }).eq("id", L.id);
+  check("status: set today's thought & activity", !t.error, t.error?.message);
+  const hack = await A.c.from("profiles").update({ today_thought: "hacked" }).eq("id", L.id).select();
+  check("status: cannot set partner's thought", (hack.data ?? []).length === 0);
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);

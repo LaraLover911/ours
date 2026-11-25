@@ -39,3 +39,7 @@ export type MessageMeta = {
   waveform?: number[];
   deleted_kind?: string;
 };
+
+export type Pop = Row<"pops">;
+export type Clip = Row<"clips">;
+export type ClipLike = Row<"clip_likes">;

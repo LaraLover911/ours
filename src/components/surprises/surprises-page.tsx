@@ -111,7 +111,7 @@ function Opening({ surprise, onClose }: { surprise: Surprise | null; onClose: ()
   const opened = !!surprise && openedId === surprise.id;
   React.useEffect(() => {
     if (!surprise) return;
-    if (!surprise.opened_at) void supabase.rpc("mark_surprise_opened", { surprise_id: surprise.id });
+    if (!surprise.opened_at) void supabase.rpc("mark_surprise_opened", { surprise_id: surprise.id }).then();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t = window.setTimeout(() => setOpenedId(surprise.id), reduced ? 0 : 900);
     return () => window.clearTimeout(t);

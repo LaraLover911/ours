@@ -129,6 +129,8 @@
   --animate-heartbeat: heartbeat 2.4s ease-in-out infinite;
   --animate-shimmer: shimmer 2.2s linear infinite;
   --animate-typing: typing 1.2s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.35s ease-out both;
+  --animate-pop-in: pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes float {
@@ -258,3 +260,24 @@ html.lenis, html.lenis body { height: auto; }
 @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes pop-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+/* Studio jumpscare: hard cut in, violent shake, red flashes. */
+@keyframes scare-in {
+  0% { transform: scale(2.4); filter: brightness(3) contrast(2); }
+  12% { transform: scale(1); filter: brightness(1.4) contrast(1.6); }
+  100% { transform: scale(1.12); filter: brightness(1) contrast(1.3); }
+}
+@keyframes scare-shake {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -14px 9px; }
+  40% { translate: 12px -11px; }
+  60% { translate: -9px -7px; }
+  80% { translate: 10px 12px; }
+}
+@keyframes scare-flash {
+  0%, 100% { background-color: #000; }
+  8%, 30% { background-color: #5a0000; }
+  16% { background-color: #fff; }
+}
+.pop-scare { animation: scare-flash 0.5s steps(1) infinite; }
+.pop-scare-face { animation: scare-in 2.2s cubic-bezier(0.16, 1, 0.3, 1) both, scare-shake 0.09s linear infinite; }
