@@ -23,7 +23,33 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "clip_likes": {
+            "calls": {
+                  Row: {
+                    "accepted_at": string | null,"callee_id": string,"caller_id": string,"connected_at": string | null,"created_at": string,"end_reason": string | null,"ended_at": string | null,"id": string,"kind": string,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accepted_at"?: string | null,"callee_id": string,"caller_id"?: string,"connected_at"?: string | null,"created_at"?: string,"end_reason"?: string | null,"ended_at"?: string | null,"id": string,"kind": string,"status"?: string
+                  }
+                  Update: {
+                    "accepted_at"?: string | null,"callee_id"?: string,"caller_id"?: string,"connected_at"?: string | null,"created_at"?: string,"end_reason"?: string | null,"ended_at"?: string | null,"id"?: string,"kind"?: string,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "calls_callee_id_fkey"
+      columns: ["callee_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "calls_caller_id_fkey"
+      columns: ["caller_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"clip_likes": {
                   Row: {
                     "clip_id": string,"created_at": string,"user_id": string
                   }
@@ -623,6 +649,9 @@ isOneToOne: false
           Functions: {
             "berlin_today":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"call_set_status":
+{ Args: { "call_id": string,"next_status": string,"reason"?: string }; Returns: string
                            },
 "game_counterpart":
 { Args: { "g": string }; Returns: string

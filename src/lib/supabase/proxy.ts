@@ -48,6 +48,9 @@ export async function updateSession(request: NextRequest) {
   const isAuthed = Boolean(data?.claims?.sub);
 
   if (!isAuthed && !isPublic(pathname)) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
     if (pathname.startsWith("/images") || pathname.startsWith("/photos")) {
       return new NextResponse(null, { status: 401 });
     }

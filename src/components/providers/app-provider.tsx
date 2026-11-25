@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { getSupabaseBrowserClient, type TypedClient } from "@/lib/supabase/client";
 import type { CoupleSettings, Profile, Update } from "@/types/app";
 import { activityFor } from "@/lib/activity";
+import { freshChannel, uniqueTopic } from "@/lib/realtime";
 
 type TypingState = Record<string, { userId: string; at: number } | undefined>;
 
@@ -112,9 +113,13 @@ export function AppProvider({
       await supabase.realtime.setAuth();
       if (cancelled) return;
 
-      const channel = supabase.channel("ours:presence", {
+      const channel = await freshChannel(supabase, "ours:presence", {
         config: { private: true, presence: { key: me.id } },
       });
+      if (cancelled) {
+        void supabase.removeChannel(channel);
+        return;
+      }
       channelRef.current = channel;
 
       channel
@@ -136,7 +141,7 @@ export function AppProvider({
         });
 
       dbChannel = supabase
-        .channel("ours:db-global")
+        .channel(uniqueTopic("ours:db-global"))
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, ({ new: row }) => {
           setProfilesList((list) => list.map((p) => (p.id === (row as Profile).id ? (row as Profile) : p)));
         })

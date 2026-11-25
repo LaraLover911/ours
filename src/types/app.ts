@@ -24,6 +24,7 @@ export type QuestionAnswer = Row<"question_answers">;
 export type GameResponse = Row<"game_responses">;
 export type Song = Row<"songs">;
 export type Surprise = Row<"surprises">;
+export type CallRow = Row<"calls">;
 
 export type Role = "abdullah" | "lara";
 export type Accent = "cherry" | "rose" | "lavender" | "sage" | "ocean" | "peach";

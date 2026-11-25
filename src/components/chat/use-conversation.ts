@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useApp } from "@/components/providers/app-provider";
 import { removeMedia, uploadMedia } from "@/lib/supabase/media";
 import { errorMessage } from "@/lib/utils/errors";
+import { uniqueTopic } from "@/lib/realtime";
 import type { Reaction } from "@/types/app";
 import type { ChatMessage } from "./types";
 
@@ -116,7 +117,7 @@ export function useConversation(conversationId: string) {
     setActiveConversation(conversationId);
 
     const channel = supabase
-      .channel(`ours:chat:${conversationId}`)
+      .channel(uniqueTopic(`ours:chat:${conversationId}`))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` }, ({ new: row }) => {
         const msg = row as ChatMessage;
         setMessages((prev) => {

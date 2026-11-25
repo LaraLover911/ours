@@ -4,6 +4,7 @@ import * as React from "react";
 import { useApp } from "@/components/providers/app-provider";
 import { useCall } from "@/components/call/call-provider";
 import type { Pop } from "@/types/app";
+import { uniqueTopic } from "@/lib/realtime";
 import { PopPlayer } from "./pop-player";
 
 /** Plays surprises from the Studio when the recipient (re)opens the app. */
@@ -34,7 +35,7 @@ export function PopDelivery() {
     const onVisible = () => document.visibilityState === "visible" && void load();
     document.addEventListener("visibilitychange", onVisible);
     const channel = supabase
-      .channel(`ours:pops:${me.id}`)
+      .channel(uniqueTopic(`ours:pops:${me.id}`))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "pops", filter: `recipient_id=eq.${me.id}` }, () => void load())
       .subscribe();
     return () => {

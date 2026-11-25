@@ -10,6 +10,7 @@ import {
   MessageCircleQuestion,
   Music2,
   Clapperboard,
+  PhoneCall,
   Settings,
   Wand2,
   type LucideIcon,
@@ -20,6 +21,7 @@ export type NavItem = { href: string; label: string; hint: string; icon: LucideI
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Home", hint: "our little world", icon: House },
   { href: "/chat", label: "Chat", hint: "miss you", icon: MessageCircleHeart },
+  { href: "/calls", label: "Calls", hint: "hear your voice", icon: PhoneCall },
   { href: "/clips", label: "Clips", hint: "our little feed", icon: Clapperboard },
   { href: "/memories", label: "Memories", hint: "our story so far", icon: Images },
   { href: "/letters", label: "Letters", hint: "open when…", icon: Mail },

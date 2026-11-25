@@ -201,5 +201,32 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("status: cannot set partner's thought", (hack.data ?? []).length === 0);
 }
 
+// Calls: history + server-checked state machine
+{
+  const id = crypto.randomUUID();
+  const spoof = await L.c.from("calls").insert({ id: crypto.randomUUID(), caller_id: A.id, callee_id: L.id, kind: "audio" });
+  check("call: cannot start a call in the partner's name", !!spoof.error);
+  const self = await A.c.from("calls").insert({ id: crypto.randomUUID(), callee_id: A.id, kind: "audio" });
+  check("call: cannot call yourself", !!self.error);
+  const fake = await A.c.from("calls").insert({ id: crypto.randomUUID(), callee_id: L.id, kind: "audio", status: "connected" });
+  check("call: cannot insert a fake connected call", !!fake.error);
+  const { error } = await A.c.from("calls").insert({ id, callee_id: L.id, kind: "video" });
+  check("call: start a call", !error, error?.message);
+  const { data: s1 } = await A.c.rpc("call_set_status", { call_id: id, next_status: "accepted" });
+  check("call: caller cannot accept own call", s1 === "ringing", s1);
+  const { data: s2 } = await L.c.rpc("call_set_status", { call_id: id, next_status: "accepted" });
+  check("call: callee accepts", s2 === "accepted", s2);
+  const upd = await L.c.from("calls").update({ status: "ended" }).eq("id", id).select();
+  check("call: no direct status edits", !!upd.error || (upd.data ?? []).length === 0);
+  await A.c.rpc("call_set_status", { call_id: id, next_status: "connected" });
+  await L.c.rpc("call_set_status", { call_id: id, next_status: "ended" });
+  const { data: s3 } = await A.c.rpc("call_set_status", { call_id: id, next_status: "connected" });
+  check("call: ended stays ended", s3 === "ended", s3);
+  const { data: row } = await L.c.from("calls").select("connected_at, ended_at").eq("id", id).single();
+  check("call: server timestamps set", !!row?.connected_at && !!row?.ended_at);
+  const anon = await client().from("calls").select("id");
+  check("call: anon sees no calls", (anon.data ?? []).length === 0);
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);
