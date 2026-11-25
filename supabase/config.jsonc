@@ -465,6 +465,11 @@
     // },
   },
 
+  // The push function checks its own auth: a member's JWT or the database webhook secret.
+  "functions": {
+    "push": { "verify_jwt": false }
+  },
+
   "analytics": {
     "enabled": true,
     "port": 54327,

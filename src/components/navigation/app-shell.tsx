@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { CallProvider } from "@/components/call/call-provider";
 import { PopDelivery } from "@/components/pops/pop-delivery";
+import { PushBootstrap } from "@/components/notifications/push-bootstrap";
 import { LogOut, MoreHorizontal } from "lucide-react";
 import { useApp } from "@/components/providers/app-provider";
 import { Avatar } from "@/components/shared/avatar";
@@ -235,6 +236,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MobileNav hidden={inConversation} />
     </div>
     <PopDelivery />
+        <PushBootstrap />
     </CallProvider>
   );
 }

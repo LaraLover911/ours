@@ -544,7 +544,7 @@ export class CallEngine {
   private notify(kind: CallKind) {
     if (!document.hidden || !("Notification" in window) || Notification.permission !== "granted") return;
     const body = kind === "video" ? `📹 ${this.partnerName} ruft per Video an` : `📞 ${this.partnerName} ruft an`;
-    const opts: NotificationOptions = { body, tag: "ours-call", icon: "/icon", requireInteraction: true } as NotificationOptions;
+    const opts: NotificationOptions = { body, tag: `call-${this.snap.callId}`, icon: "/icon", requireInteraction: true } as NotificationOptions;
     navigator.serviceWorker?.getRegistration().then((reg) => {
       if (reg) return reg.showNotification("ours. ♡", { ...opts, data: { url: "/" } });
       new Notification("ours. ♡", opts);
@@ -596,6 +596,7 @@ export class CallEngine {
     this.ringer = null;
     this.clearTimers();
     this.set({ phase: "connecting" });
+    this.closeCallNotification();
     this.log("Angenommen");
     let stream: MediaStream;
     try {
@@ -1072,7 +1073,19 @@ export class CallEngine {
     this.finish(message, { error: true });
   }
 
+  /** The "X ruft an" notification is outdated once the call was answered or ended. */
+  private closeCallNotification() {
+    const tag = this.snap.callId ? `call-${this.snap.callId}` : null;
+    if (!tag || typeof navigator === "undefined" || !navigator.serviceWorker) return;
+    navigator.serviceWorker
+      .getRegistration()
+      .then((r) => r?.getNotifications({ tag }))
+      .then((list) => list?.forEach((n) => n.close()))
+      .catch(() => {});
+  }
+
   private finish(reason: string | null, opts: { error?: boolean; silent?: boolean } = {}) {
+    this.closeCallNotification();
     this.token++;
     this.clearTimers();
     window.clearInterval(this.ringLoop);

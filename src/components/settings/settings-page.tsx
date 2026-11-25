@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, Camera, Check, ImageOff, KeyRound, LogOut, Monitor, Moon, Palette, Shield, Sun, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -274,25 +275,12 @@ function AppearanceSection() {
 }
 
 function NotificationsSection() {
-  const { me, updateMe } = useApp();
-  const [asked, setPerm] = React.useState<NotificationPermission | null>(null);
-  const system = React.useSyncExternalStore<NotificationPermission | "unsupported">(
-    () => () => {},
-    () => ("Notification" in window ? Notification.permission : "unsupported"),
-    () => "default",
-  );
-  const perm = asked ?? system;
   return (
-    <Section id="notifications" icon={<Bell />} title="notifications" description="Benachrichtigungen bei neuen Nachrichten, solange ours. in einem Tab oder als App geöffnet ist.">
-      <Row label="Neue Nachrichten" hint="Wenn der Tab im Hintergrund ist">
-        <Switch checked={me.notify_messages} onCheckedChange={(v) => updateMe({ notify_messages: v })} aria-label="Benachrichtigungen für Nachrichten" />
-      </Row>
-      <Row label="Browser-Erlaubnis" hint={perm === "granted" ? "erlaubt" : perm === "denied" ? "blockiert, bitte in den Browser-Einstellungen erlauben" : perm === "unsupported" ? "von diesem Browser nicht unterstützt" : "noch nicht gefragt"}>
-        {perm === "default" ? (
-          <Button size="sm" variant="outline" onClick={async () => setPerm(await Notification.requestPermission())}>Erlauben</Button>
-        ) : (
-          <span className="text-sm text-muted-foreground">{perm === "granted" ? "✓" : "–"}</span>
-        )}
+    <Section id="notifications" icon={<Bell />} title="notifications" description="Push-Benachrichtigungen für Nachrichten, Anrufe, Briefe, Einladungen und mehr, auch wenn ours. zu ist.">
+      <Row label="Benachrichtigungen" hint="Pro Gerät aktivieren, Kategorien wählen, Test senden">
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/notifications">Öffnen</Link>
+        </Button>
       </Row>
     </Section>
   );

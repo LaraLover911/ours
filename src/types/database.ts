@@ -509,6 +509,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"notification_prefs": {
+                  Row: {
+                    "categories": NonNullable<Json>,"previews": boolean,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "categories"?: NonNullable<Json>,"previews"?: boolean,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "categories"?: NonNullable<Json>,"previews"?: boolean,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notification_prefs_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"pops": {
                   Row: {
                     "body": string | null,"created_at": string,"id": string,"kind": string,"media_path": string | null,"recipient_id": string,"scream": boolean,"sender_id": string,"shown_at": string | null,"teaser": string | null
@@ -548,6 +568,54 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"push_config": {
+                  Row: {
+                    "function_url": string | null,"id": number,"vapid_private": string | null,"vapid_public": string | null,"vapid_subject": string | null,"webhook_secret": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "function_url"?: string | null,"id"?: number,"vapid_private"?: string | null,"vapid_public"?: string | null,"vapid_subject"?: string | null,"webhook_secret"?: string
+                  }
+                  Update: {
+                    "function_url"?: string | null,"id"?: number,"vapid_private"?: string | null,"vapid_public"?: string | null,"vapid_subject"?: string | null,"webhook_secret"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"push_log": {
+                  Row: {
+                    "created_at": string,"event_key": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"event_key": string
+                  }
+                  Update: {
+                    "created_at"?: string,"event_key"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"push_subscriptions": {
+                  Row: {
+                    "auth": string,"created_at": string,"device_id": string | null,"endpoint": string,"failures": number,"id": string,"label": string | null,"last_error": string | null,"last_success_at": string | null,"p256dh": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "auth": string,"created_at"?: string,"device_id"?: string | null,"endpoint": string,"failures"?: number,"id"?: string,"label"?: string | null,"last_error"?: string | null,"last_success_at"?: string | null,"p256dh": string,"user_id"?: string
+                  }
+                  Update: {
+                    "auth"?: string,"created_at"?: string,"device_id"?: string | null,"endpoint"?: string,"failures"?: number,"id"?: string,"label"?: string | null,"last_error"?: string | null,"last_success_at"?: string | null,"p256dh"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "push_subscriptions_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"question_answers": {
                   Row: {
@@ -712,6 +780,15 @@ isOneToOne: false
                            },
 "partner_id":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"push_dispatch":
+{ Args: { "actor": string,"event_type": string,"record_id": string }; Returns: undefined
+                           },
+"push_public_key":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"push_register":
+{ Args: { "sub_auth": string,"sub_device": string,"sub_endpoint": string,"sub_label": string,"sub_p256dh": string }; Returns: string
                            },
 "question_for_day":
 { Args: { "q_day"?: string }; Returns: {

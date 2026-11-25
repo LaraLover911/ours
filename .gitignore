@@ -48,3 +48,7 @@ next-env.d.ts
 # supabase local
 supabase/.temp/
 supabase/.branches/
+
+# local-only TLS bundle for the edge runtime behind a proxy
+supabase/functions/.local-ca.pem
+supabase/functions/.env.local

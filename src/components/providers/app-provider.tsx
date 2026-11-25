@@ -8,6 +8,7 @@ import type { CoupleSettings, Profile, Update } from "@/types/app";
 import { activityFor } from "@/lib/activity";
 import { uniqueTopic } from "@/lib/realtime";
 import { getDeviceId, resetDeviceId } from "@/lib/device";
+import { pushActiveHere } from "@/lib/push/client";
 import { PresenceService, summarize, type ActivityKind, type PartnerPresence, type PresenceSnapshot } from "@/lib/presence/service";
 
 type TypingState = Record<string, { userId: string; at: number } | undefined>;
@@ -190,6 +191,7 @@ export function AppProvider({
             setUnread((u) => ({ ...u, [msg.conversation_id]: (u[msg.conversation_id] ?? 0) + 1 }));
           }
           if (
+            !pushActiveHere() &&
             meRef.current.notify_messages &&
             document.hidden &&
             "Notification" in window &&
@@ -197,7 +199,7 @@ export function AppProvider({
           ) {
             const body = msg.kind === "text" ? (msg.body ?? "") : msg.kind === "audio" ? "🎙️ Sprachnachricht" : msg.kind === "video" ? "🎬 Video" : "📷 Foto";
             try {
-              new Notification(`ours. ♡`, { body: body.slice(0, 120), tag: msg.conversation_id, icon: "/icon" });
+              new Notification(`ours. ♡`, { body: body.slice(0, 120), tag: `chat-${msg.conversation_id}`, icon: "/icon" });
             } catch {
               /* some mobile browsers only allow notifications from a service worker */
             }
