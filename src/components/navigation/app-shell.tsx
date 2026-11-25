@@ -15,7 +15,7 @@ import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle, DialogDes
 import { SmoothScroll } from "@/components/animations/smooth-scroll";
 import { PhotoRefImage } from "@/components/shared/media";
 import { cn } from "@/lib/utils";
-import { MOBILE_PRIMARY, NAV_ITEMS, isActive } from "./nav-items";
+import { MOBILE_PRIMARY, NAV_GROUPS, NAV_ITEMS, isActive } from "./nav-items";
 
 function UnreadDot({ count, className }: { count: number; className?: string }) {
   if (!count) return null;
@@ -72,31 +72,36 @@ function Sidebar() {
       </div>
 
       <nav aria-label="Hauptnavigation" className="no-scrollbar mt-5 flex-1 overflow-y-auto">
-        <ul className="grid gap-0.5">
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(pathname, item.href);
-            const Icon = item.icon;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "group relative flex h-10 items-center gap-3 rounded-xl px-3 text-[14px] transition-colors",
-                    active ? "text-foreground" : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-                  )}
-                >
-                  {active ? (
-                    <motion.span layoutId="sidebar-active" className="absolute inset-0 rounded-xl bg-card shadow-soft ring-1 ring-border" transition={{ type: "spring", stiffness: 500, damping: 40 }} />
-                  ) : null}
-                  <Icon className={cn("relative size-[18px]", active && "text-primary")} />
-                  <span className="relative flex-1">{item.label}</span>
-                  {item.href === "/chat" ? <UnreadDot count={unreadTotal} className="relative" /> : null}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {NAV_GROUPS.map((g) => (
+          <div key={g.id} className="mb-3">
+            {g.id !== "us" ? <p className="eyebrow mb-1 px-3 text-[10.5px]">{g.label}</p> : null}
+            <ul className="grid gap-0.5">
+              {NAV_ITEMS.filter((i) => i.group === g.id).map((item) => {
+                const active = isActive(pathname, item.href);
+                const Icon = item.icon;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "group relative flex h-9 items-center gap-3 rounded-xl px-3 text-[14px] transition-colors",
+                        active ? "text-foreground" : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                      )}
+                    >
+                      {active ? (
+                        <motion.span layoutId="sidebar-active" className="absolute inset-0 rounded-xl bg-card shadow-soft ring-1 ring-border" transition={{ type: "spring", stiffness: 500, damping: 40 }} />
+                      ) : null}
+                      <Icon className={cn("relative size-[18px]", active && "text-primary")} />
+                      <span className="relative flex-1">{item.label}</span>
+                      {item.href === "/chat" ? <UnreadDot count={unreadTotal} className="relative" /> : null}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       <button
@@ -171,27 +176,36 @@ function MobileNav({ hidden }: { hidden: boolean }) {
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
-            <ul className="grid grid-cols-3 gap-2.5">
-              {more.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(pathname, item.href);
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setMoreOpen(false)}
-                      className={cn(
-                        "flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-background text-[13px] font-medium transition-transform active:scale-95",
-                        active && "border-primary/30 bg-primary-soft text-primary-soft-foreground",
-                      )}
-                    >
-                      <Icon className="size-6" strokeWidth={1.7} />
-                      {item.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            {NAV_GROUPS.map((g) => {
+              const items = more.filter((i) => i.group === g.id);
+              if (!items.length) return null;
+              return (
+                <div key={g.id} className="mb-4">
+                  <p className="eyebrow mb-2">{g.label}</p>
+                  <ul className="grid grid-cols-4 gap-2">
+                    {items.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(pathname, item.href);
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            onClick={() => setMoreOpen(false)}
+                            className={cn(
+                              "flex aspect-square flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-background px-1 text-center text-[11.5px] leading-tight font-medium transition-transform active:scale-95",
+                              active && "border-primary/30 bg-primary-soft text-primary-soft-foreground",
+                            )}
+                          >
+                            <Icon className="size-[22px]" strokeWidth={1.7} />
+                            <span className="w-full truncate">{item.label}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
             <button onClick={signOut} className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm text-muted-foreground hover:bg-muted">
               <LogOut className="size-4" /> Abmelden
             </button>

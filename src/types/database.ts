@@ -23,7 +23,27 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "calls": {
+            "activity_events": {
+                  Row: {
+                    "created_at": string,"id": string,"kind": string,"ref_id": string | null,"summary": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"kind": string,"ref_id"?: string | null,"summary": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"kind"?: string,"ref_id"?: string | null,"summary"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "activity_events_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"calls": {
                   Row: {
                     "accepted_at": string | null,"callee_id": string,"caller_id": string,"connected_at": string | null,"created_at": string,"end_reason": string | null,"ended_at": string | null,"id": string,"kind": string,"status": string
                   }
@@ -339,6 +359,52 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"integration_connections": {
+                  Row: {
+                    "account_label": string | null,"connected_at": string,"last_error": string | null,"provider": string,"scopes": (string)[],"status": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_label"?: string | null,"connected_at"?: string,"last_error"?: string | null,"provider": string,"scopes"?: (string)[],"status"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "account_label"?: string | null,"connected_at"?: string,"last_error"?: string | null,"provider"?: string,"scopes"?: (string)[],"status"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "integration_connections_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"integration_tokens": {
+                  Row: {
+                    "ciphertext": string,"expires_at": string | null,"provider": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ciphertext": string,"expires_at"?: string | null,"provider": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "ciphertext"?: string,"expires_at"?: string | null,"provider"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "integration_tokens_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "integration_tokens_user_id_provider_fkey"
+      columns: ["user_id","provider"]
+isOneToOne: true
+      referencedRelation: "integration_connections"
+      referencedColumns: ["user_id","provider"]
+    }
+                  ]
                 },"invites": {
                   Row: {
                     "accepted_at": string | null,"created_at": string,"display_name": string,"email": string,"role": string
@@ -557,14 +623,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "accent": string,"avatar_path": string | null,"bio": string | null,"created_at": string,"display_name": string,"id": string,"last_activity": string | null,"last_activity_at": string | null,"last_seen_at": string | null,"notify_messages": boolean,"read_receipts": boolean,"role": string,"share_activity": boolean,"show_online": boolean,"theme": string,"today_thought": string | null,"today_thought_at": string | null,"updated_at": string
+                    "accent": string,"avatar_path": string | null,"bio": string | null,"created_at": string,"display_name": string,"id": string,"last_activity": string | null,"last_activity_at": string | null,"last_seen_at": string | null,"notify_messages": boolean,"read_receipts": boolean,"role": string,"share_activity": boolean,"share_activity_feed": boolean,"show_online": boolean,"theme": string,"today_thought": string | null,"today_thought_at": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name": string,"id": string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role": string,"share_activity"?: boolean,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
+                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name": string,"id": string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role": string,"share_activity"?: boolean,"share_activity_feed"?: boolean,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string,"id"?: string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role"?: string,"share_activity"?: boolean,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
+                    "accent"?: string,"avatar_path"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string,"id"?: string,"last_activity"?: string | null,"last_activity_at"?: string | null,"last_seen_at"?: string | null,"notify_messages"?: boolean,"read_receipts"?: boolean,"role"?: string,"share_activity"?: boolean,"share_activity_feed"?: boolean,"show_online"?: boolean,"theme"?: string,"today_thought"?: string | null,"today_thought_at"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -766,8 +832,22 @@ isOneToOne: false
 "has_game_response":
 { Args: { "g": string,"k": string }; Returns: boolean
                            },
+"integration_mark":
+{ Args: { "p_error": string,"p_provider": string,"p_status": string }; Returns: undefined
+                           },
+"integration_save":
+{ Args: { "p_ciphertext": string,"p_expires_at": string,"p_label": string,"p_provider": string,"p_scopes": (string)[] }; Returns: undefined
+                           },
+"integration_token":
+{ Args: { "p_provider": string }; Returns: {
+              "ciphertext": string,"expires_at": string
+            }[]
+                           },
 "is_member":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"log_activity":
+{ Args: { "actor": string,"event_kind": string,"ref": string,"text_summary": string }; Returns: undefined
                            },
 "mark_letter_opened":
 { Args: { "letter_id": string }; Returns: undefined

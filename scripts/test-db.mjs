@@ -228,5 +228,49 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("call: anon sees no calls", (anon.data ?? []).length === 0);
 }
 
+// Our Activity: opt-in, server-written only, never private things
+{
+  const forged = await A.c.from("activity_events").insert({ user_id: L.id, kind: "message", summary: "fake" });
+  check("activity: clients cannot write events", !!forged.error);
+  await A.c.from("profiles").update({ share_activity_feed: false }).eq("id", A.id);
+  await A.c.from("memories").insert({ title: "nicht teilen" });
+  let { data: ev } = await L.c.from("activity_events").select("summary").eq("user_id", A.id);
+  check("activity: nothing recorded while off", (ev ?? []).length === 0);
+  await A.c.from("profiles").update({ share_activity_feed: true }).eq("id", A.id);
+  await A.c.from("memories").insert({ title: "Ausflug" });
+  await A.c.from("diary_entries").insert({ body: "ganz privat", visibility: "private" });
+  await A.c.from("diary_entries").insert({ body: "für uns", visibility: "ours" });
+  ({ data: ev } = await L.c.from("activity_events").select("kind, summary").eq("user_id", A.id));
+  check("activity: recorded when on", ev?.some((e) => e.summary.includes("Ausflug")));
+  check("activity: private diary never appears", (ev ?? []).filter((e) => e.kind === "diary").length === 1);
+  const del = await L.c.from("activity_events").delete().eq("user_id", A.id).select();
+  check("activity: partner cannot delete my events", (del.data ?? []).length === 0);
+  await A.c.from("profiles").update({ share_activity_feed: false }).eq("id", A.id);
+}
+
+// Devices
+{
+  const id = crypto.randomUUID();
+  const hb = await A.c.rpc("device_heartbeat", { info: { id, name: "Test", device_type: "desktop", os: "Linux", battery_level: 250 } });
+  check("devices: heartbeat registers", !hb.error && hb.data?.ended === false, hb.error?.message);
+  const steal = await L.c.rpc("device_heartbeat", { info: { id, device_type: "mobile" } });
+  check("devices: cannot take over the partner's device id", !!steal.error);
+  const { data: row } = await A.c.from("device_sessions").select("battery_level").eq("id", id).single();
+  check("devices: values are clamped", row?.battery_level === 100);
+  const end = await L.c.rpc("device_end", { device_id: id });
+  const { data: still } = await A.c.from("device_sessions").select("ended_at").eq("id", id).single();
+  check("devices: partner cannot end my device", !end.error && still?.ended_at === null);
+}
+
+// Push & integrations: server-only tables stay closed
+{
+  const cfg = await A.c.from("push_config").select("*");
+  check("push: VAPID/config table unreadable", !!cfg.error || (cfg.data ?? []).length === 0);
+  const tok = await A.c.from("integration_tokens").select("*");
+  check("integrations: token table unreadable", !!tok.error || (tok.data ?? []).length === 0);
+  const fakeConn = await A.c.from("integration_connections").insert({ provider: "spotify" });
+  check("integrations: connections only via server", !!fakeConn.error);
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);
