@@ -10,7 +10,18 @@ import { createClient } from "npm:@supabase/supabase-js@2.119.2";
 import webpush from "npm:web-push@3.6.7";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// New projects expose secret keys as a JSON dictionary; older ones the legacy service role key.
+function serviceKey(): string {
+  try {
+    const keys = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}") as Record<string, string>;
+    const first = keys.default ?? Object.values(keys)[0];
+    if (first) return first;
+  } catch {
+    /* fall through */
+  }
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+}
+const SERVICE_KEY = serviceKey();
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 const CORS = {
