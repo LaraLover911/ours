@@ -20,6 +20,7 @@ import {
   Bell,
   MonitorSmartphone,
   ShieldCheck,
+  Plug,
   type LucideIcon,
 } from "lucide-react";
 
@@ -53,6 +54,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dates", label: "Dates", hint: "our next little adventure", icon: CalendarHeart, group: "plans" },
   { href: "/activity", label: "Activity", hint: "little moments", icon: Activity, group: "you" },
   { href: "/devices", label: "Devices", hint: "where we are", icon: MonitorSmartphone, group: "you" },
+  { href: "/integrations", label: "Integrations", hint: "connected, carefully", icon: Plug, group: "you" },
   { href: "/notifications", label: "Notifications", hint: "stay close", icon: Bell, group: "you" },
   { href: "/privacy", label: "Privacy", hint: "just us two", icon: ShieldCheck, group: "you" },
   { href: "/settings", label: "Settings", hint: "make it ours", icon: Settings, group: "you" },

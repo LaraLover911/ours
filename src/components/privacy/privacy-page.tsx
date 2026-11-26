@@ -151,7 +151,9 @@ export function PrivacyPage() {
             </Button>
           }
         >
-          <p className="text-[13px] text-muted-foreground">Zugangsschlüssel liegen nur auf dem Server, nie im Browser oder im Code. Du kannst jede Verbindung jederzeit trennen.</p>
+          <p className="text-[13px] text-muted-foreground">
+            Zugangsschlüssel liegen nur auf dem Server, nie im Browser oder im Code. Tokens werden verschlüsselt gespeichert, du kannst jede Verbindung jederzeit trennen. Fürs Wetter speicherst du nur eine Stadt, die du selbst eintippst. Es wird kein Standort abgefragt und keine IP-Adresse ausgewertet.
+          </p>
         </Section>
 
         <Section icon={<ShieldCheck />} title="Browser-Berechtigungen" description="Was dieser Browser ours. gerade erlaubt. Ändern kannst du das in den Website-Einstellungen deines Browsers.">

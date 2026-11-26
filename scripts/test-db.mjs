@@ -532,5 +532,20 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("pet: reunion cheers Mochi up", !back.error && back.data.stats.joy > v.joy + 20 && back.data.mood !== "missed_you", back.error?.message);
 }
 
+// ---------------------------------------------------------------------------
+// Integrations: the weather place is yours to write, readable by both
+{
+  await A.c.from("weather_places").delete().eq("user_id", A.id);
+  const mine = await A.c.from("weather_places").insert({ user_id: A.id, name: "Berlin", lat: 52.52, lon: 13.4 });
+  check("weather: I can save my own place", !mine.error, mine.error?.message);
+  const other = await A.c.from("weather_places").insert({ user_id: L.id, name: "Fake", lat: 1, lon: 1 });
+  check("weather: I cannot set the partner's place", !!other.error);
+  const read = await L.c.from("weather_places").select("name").eq("user_id", A.id).maybeSingle();
+  check("weather: partner can read my city", read.data?.name === "Berlin");
+  const bad = await A.c.from("weather_places").update({ lat: 200 }).eq("user_id", A.id).select();
+  check("weather: coordinates are validated", !!bad.error);
+  await A.c.from("weather_places").delete().eq("user_id", A.id);
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);

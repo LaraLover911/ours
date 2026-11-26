@@ -1275,6 +1275,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"weather_places": {
+                  Row: {
+                    "country": string | null,"lat": number,"lon": number,"name": string,"timezone": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "country"?: string | null,"lat": number,"lon": number,"name": string,"timezone"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "country"?: string | null,"lat"?: number,"lon"?: number,"name"?: string,"timezone"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "weather_places_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
