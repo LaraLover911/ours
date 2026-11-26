@@ -15,7 +15,8 @@ import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle, DialogDes
 import { SmoothScroll } from "@/components/animations/smooth-scroll";
 import { PhotoRefImage } from "@/components/shared/media";
 import { cn } from "@/lib/utils";
-import { MOBILE_PRIMARY, NAV_GROUPS, NAV_ITEMS, isActive } from "./nav-items";
+import { Mochi2D } from "@/components/pet/mochi-2d";
+import { MOBILE_PRIMARY, MOCHI_ITEM, NAV_GROUPS, NAV_ITEMS, isActive } from "./nav-items";
 
 function UnreadDot({ count, className }: { count: number; className?: string }) {
   if (!count) return null;
@@ -26,6 +27,34 @@ function UnreadDot({ count, className }: { count: number; className?: string }) 
     >
       {count > 99 ? "99+" : count}
     </span>
+  );
+}
+
+/** Mochi's own entry: a little game tile, set apart from the rest of the menu. */
+function MochiTile({ onNavigate, className }: { onNavigate?: () => void; className?: string }) {
+  const pathname = usePathname();
+  const active = isActive(pathname, MOCHI_ITEM.href);
+  return (
+    <Link
+      href={MOCHI_ITEM.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      aria-label="Mochi, euer Spiel"
+      className={cn(
+        "group flex items-center gap-3 rounded-2xl border-[3px] border-white bg-gradient-to-br from-[#bfe5ff] via-[#ffe1ea] to-[#fff3ea] p-2 pr-3 text-[#2b2140] shadow-[0_4px_0_rgba(43,33,64,.10)] transition-transform hover:-translate-y-0.5 active:translate-y-0.5 dark:border-white/10 dark:from-[#1d2742] dark:via-[#2b2140] dark:to-[#241b33] dark:text-white",
+        active && "ring-2 ring-[#ff6fa0] ring-offset-2 ring-offset-background",
+        className,
+      )}
+    >
+      <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-xl bg-white/80 dark:bg-white/10">
+        <Mochi2D mood="happy" stage={1} className="w-[88%] text-[#2b2140] transition-transform group-hover:scale-110" />
+      </span>
+      <span className="min-w-0 flex-1 leading-tight">
+        <span className="block text-[15px] font-semibold">Mochi</span>
+        <span className="block truncate text-[12px] opacity-70">euer Spiel</span>
+      </span>
+      <span className="rounded-full bg-[#ff6fa0] px-2.5 py-1 text-[12px] font-bold text-white shadow-[inset_0_-2px_0_rgba(0,0,0,.15)]">{active ? "Im Spiel" : "Spielen"}</span>
+    </Link>
   );
 }
 
@@ -104,9 +133,11 @@ function Sidebar() {
         ))}
       </nav>
 
+      <MochiTile className="mt-3" />
+
       <button
         onClick={signOut}
-        className="mt-3 flex h-10 items-center gap-3 rounded-xl px-3 text-[14px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+        className="mt-2 flex h-10 items-center gap-3 rounded-xl px-3 text-[14px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
       >
         <LogOut className="size-[18px]" /> Abmelden
       </button>
@@ -121,7 +152,7 @@ function MobileNav({ hidden }: { hidden: boolean }) {
   const signOut = useSignOut();
   const primary = NAV_ITEMS.filter((i) => MOBILE_PRIMARY.includes(i.href));
   const more = NAV_ITEMS.filter((i) => !MOBILE_PRIMARY.includes(i.href));
-  const moreActive = more.some((i) => isActive(pathname, i.href));
+  const moreActive = more.some((i) => isActive(pathname, i.href)) || isActive(pathname, MOCHI_ITEM.href);
 
 
   return (
@@ -206,6 +237,8 @@ function MobileNav({ hidden }: { hidden: boolean }) {
                 </div>
               );
             })}
+            <p className="eyebrow mb-2">game</p>
+            <MochiTile onNavigate={() => setMoreOpen(false)} />
             <button onClick={signOut} className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm text-muted-foreground hover:bg-muted">
               <LogOut className="size-4" /> Abmelden
             </button>

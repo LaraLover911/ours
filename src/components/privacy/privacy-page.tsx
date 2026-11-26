@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Bell, Camera, EyeOff, Fingerprint, Globe2, MapPinOff, Mic, Plug, ShieldCheck, Smartphone, Sparkles, UserRound } from "lucide-react";
+import { Bell, Camera, EyeOff, Fingerprint, Globe2, MapPinOff, Mic, Plug, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { useApp } from "@/components/providers/app-provider";
 import { PageContainer } from "@/components/navigation/app-shell";
 import { PageHeader } from "@/components/shared/states";
@@ -50,10 +50,6 @@ export function PrivacyPage() {
   const perms = usePermissions();
   const partnerName = partner?.display_name ?? "dein Schatz";
 
-  const devices = useQuery(async () => {
-    const { data } = await supabase.rpc("devices_overview");
-    return data ?? [];
-  }, [supabase]);
   const subs = useQuery(async () => (await supabase.from("push_subscriptions").select("id, label")).data ?? [], [supabase]);
   const prefs = useQuery(async () => (await supabase.from("notification_prefs").select("categories, previews").eq("user_id", me.id).maybeSingle()).data, [supabase, me.id]);
   const integrations = useQuery(async () => {
@@ -61,7 +57,6 @@ export function PrivacyPage() {
     return error ? null : (data ?? []);
   }, [supabase, me.id]);
 
-  const myDevices = (devices.data ?? []).filter((d) => d.mine);
   const offCategories = Object.entries((prefs.data?.categories ?? {}) as Record<string, boolean>).filter(([, v]) => v === false).length;
 
   return (
@@ -73,7 +68,7 @@ export function PrivacyPage() {
             just <em className="text-primary">us two</em>
           </>
         }
-        description={`Alles, was ${partnerName} über dich sieht, welche Geräte und Dienste verbunden sind und was ours. nie erfasst.`}
+        description={`Alles, was ${partnerName} über dich sieht, welche Dienste verbunden sind und was ours. nie erfasst.`}
       />
 
       <div className="grid gap-5">
@@ -90,32 +85,6 @@ export function PrivacyPage() {
           <Row label="Lesebestätigungen" hint="Aus: ihr seht beide kein „Gelesen“">
             <Switch checked={me.read_receipts} onCheckedChange={(v) => updateMe({ read_receipts: v })} aria-label="Lesebestätigungen" />
           </Row>
-        </Section>
-
-        <Section
-          icon={<Smartphone />}
-          title="Geräte"
-          description={devices.data ? `${myDevices.length} ${myDevices.length === 1 ? "Gerät" : "Geräte"} angemeldet. Pro Gerät entscheidest du, welche Details ${partnerName} sieht.` : "…"}
-          actions={
-            <Button size="sm" variant="outline" asChild>
-              <Link href="/devices">Verwalten</Link>
-            </Button>
-          }
-        >
-          <ul className="space-y-1.5 text-[14px]">
-            {myDevices.map((d) => {
-              const share = (d.share ?? {}) as Record<string, boolean>;
-              const shown = ["os", "browser", "screen", "pwa", "app", "connection", "battery"].filter((k) => share[k] === true);
-              return (
-                <li key={d.id} className="flex flex-wrap items-baseline gap-x-2">
-                  <span className="font-medium">{d.name}</span>
-                  <span className="text-muted-foreground">
-                    {share.visible === false ? `für ${partnerName} unsichtbar` : `${partnerName} sieht: Name, online${shown.length ? `, ${shown.length} Details` : ""}`}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
         </Section>
 
         <Section

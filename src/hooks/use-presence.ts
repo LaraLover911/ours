@@ -30,7 +30,6 @@ export function usePresence() {
   } else {
     label = parseActivity(p.place)?.doing ?? "ist gerade da";
   }
-  if (p.online && p.devices > 1) label += ` · auf ${p.devices} Geräten`;
   const tone: "online" | "idle" | "offline" = !p.online ? "offline" : p.state === "online" ? "online" : "idle";
   return { ...p, name, label, tone, lastSeenAt, lastActivityAt: partner?.share_activity !== false ? (partner?.last_activity_at ?? null) : null };
 }

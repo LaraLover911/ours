@@ -18,7 +18,6 @@ import {
   Wand2,
   Activity,
   Bell,
-  MonitorSmartphone,
   ShieldCheck,
   Plug,
   CalendarDays,
@@ -56,7 +55,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/voice", label: "Voice", hint: "just your voice", icon: Mic, group: "us" },
   { href: "/play", label: "Play", hint: "game night", icon: Joystick, group: "together" },
   { href: "/games", label: "Games", hint: "just for fun", icon: Gamepad2, group: "together" },
-  { href: "/pet", label: "Mochi", hint: "our little pet", icon: PawPrint, group: "together" },
   { href: "/listen", label: "Listen", hint: "same song, same second", icon: Headphones, group: "together" },
   { href: "/music", label: "Music", hint: "this song reminds me of you", icon: Music2, group: "together" },
   { href: "/challenge", label: "Challenge", hint: "one little thing", icon: Sparkles, group: "together" },
@@ -75,12 +73,14 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/wishlist", label: "Wishlist", hint: "little wishes", icon: GiftIcon, group: "plans" },
   { href: "/goals", label: "Goals", hint: "step by step", icon: Target, group: "plans" },
   { href: "/activity", label: "Activity", hint: "little moments", icon: Activity, group: "you" },
-  { href: "/devices", label: "Devices", hint: "where we are", icon: MonitorSmartphone, group: "you" },
   { href: "/integrations", label: "Integrations", hint: "connected, carefully", icon: Plug, group: "you" },
   { href: "/notifications", label: "Notifications", hint: "stay close", icon: Bell, group: "you" },
   { href: "/privacy", label: "Privacy", hint: "just us two", icon: ShieldCheck, group: "you" },
   { href: "/settings", label: "Settings", hint: "make it ours", icon: Settings, group: "you" },
 ];
+
+/** Mochi lives in its own spot at the bottom of the navigation, like a game you open. */
+export const MOCHI_ITEM: NavItem = { href: "/pet", label: "Mochi", hint: "euer Spiel", icon: PawPrint, group: "together" };
 
 export const MOBILE_PRIMARY = ["/", "/chat", "/clips", "/memories"];
 

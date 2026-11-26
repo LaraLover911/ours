@@ -6,7 +6,6 @@ const LABELS: [prefix: string, doing: string, place: string][] = [
   ["/chat", "ist im Chat", "Chat"],
   ["/clips", "schaut Clips", "Clips"],
   ["/calls", "ist bei den Anrufen", "Calls"],
-  ["/devices", "schaut eure Geräte an", "Devices"],
   ["/privacy", "ist im Privacy Dashboard", "Privacy"],
   ["/activity", "schaut eure Aktivität an", "Activity"],
   ["/play", "ist in der Spiele-Lobby", "Play Together"],

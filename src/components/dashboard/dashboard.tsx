@@ -8,7 +8,7 @@ import { ArrowUpRight, CalendarClock, Gift, Mail, MessageCircleHeart, MessageCir
 import { toast } from "sonner";
 import { useApp } from "@/components/providers/app-provider";
 import { PageContainer } from "@/components/navigation/app-shell";
-import { NAV_ITEMS } from "@/components/navigation/nav-items";
+import { MOCHI_ITEM, NAV_ITEMS } from "@/components/navigation/nav-items";
 import { Avatar } from "@/components/shared/avatar";
 import { HeartGlyph } from "@/components/shared/heart";
 import { PrivateImage } from "@/components/shared/media";
@@ -319,7 +319,7 @@ export function Dashboard() {
 }
 
 function QuickAccess() {
-  const items = NAV_ITEMS.filter((i) => i.href !== "/");
+  const items = [...NAV_ITEMS.filter((i) => i.href !== "/"), MOCHI_ITEM];
   return (
     <section aria-labelledby="quick-title" className="mt-14">
       <div className="mb-5 flex items-end justify-between">
