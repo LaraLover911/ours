@@ -201,7 +201,7 @@ function WebAdd({ onAdd }: { onAdd: (h: Hit) => Promise<boolean> }) {
     const j = r ? await r.json().catch(() => ({})) : {};
     if (!r?.ok) {
       setRes(null);
-      return setErr(r?.status === 503 ? `${provider === "unsplash" ? "Unsplash" : "GIPHY"} ist noch nicht eingerichtet (siehe Integrations).` : (j.error ?? "Nicht erreichbar"));
+      return setErr(r?.status === 503 ? `${provider === "unsplash" ? "Unsplash" : "GIPHY"} ist noch nicht eingerichtet.` : (j.error ?? "Nicht erreichbar"));
     }
     setRes(j);
   };

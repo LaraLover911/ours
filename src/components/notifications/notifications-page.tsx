@@ -20,7 +20,7 @@ const CATEGORIES: { id: string; label: string; hint: string; icon: React.Compone
   { id: "chat", label: "Nachrichten", hint: "Neue Chat-Nachrichten", icon: MessageCircleHeart },
   { id: "call", label: "Anrufe", hint: "Eingehende und verpasste Anrufe", icon: Phone },
   { id: "letter", label: "Briefe", hint: "Ein neuer Brief für dich", icon: Mail },
-  { id: "game", label: "Einladungen", hint: "Zu Spielen und Listen Together", icon: Gamepad2 },
+  { id: "game", label: "Einladungen", hint: "Zu Spielen", icon: Gamepad2 },
   { id: "memory", label: "Erinnerungen", hint: "Neue Erinnerungen", icon: Images },
   { id: "daily_question", label: "Frage des Tages", hint: "Um 10 Uhr und wenn dein Schatz geantwortet hat", icon: MessageCircleQuestion },
   { id: "events", label: "Dates & Termine", hint: "Neue Date-Ideen und gemeinsame Termine", icon: CalendarHeart },

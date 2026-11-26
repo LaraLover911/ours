@@ -220,6 +220,7 @@ export function useConversation(conversationId: string) {
     reply_to_id: null,
     edited_at: null,
     deleted_at: null,
+    opened_at: null,
     created_at: new Date().toISOString(),
     ...partial,
     _local: { status: "sending", ...partial._local },
@@ -277,6 +278,45 @@ export function useConversation(conversationId: string) {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [insertMessage, conversationId, me.id],
+  );
+
+  /** A photo or video snap: the recipient can open it once. */
+  const sendSnap = React.useCallback(
+    async (file: File | Blob, meta: { media: "image" | "video"; caption?: string; seconds?: number; duration?: number; width?: number; height?: number }) => {
+      const previewUrl = URL.createObjectURL(file);
+      const msg = optimistic({
+        kind: "snap",
+        body: meta.caption?.trim().slice(0, 200) || null,
+        attachment_meta: { media: meta.media, seconds: meta.seconds, duration: meta.duration, width: meta.width, height: meta.height },
+        _local: { status: "sending", previewUrl, file },
+      });
+      setMessages((prev) => [...prev, msg]);
+      const attempt = async () => {
+        setMessages((prev) => prev.map((p) => (p.id === msg.id ? { ...p, _local: { ...p._local, status: "sending" } } : p)));
+        try {
+          const up = await uploadMedia(file, "snaps");
+          const attachment_meta = { ...(msg.attachment_meta as object), mime: up.mime, size: up.size, width: up.width ?? meta.width, height: up.height ?? meta.height };
+          await insertMessage({ ...msg, attachment_path: up.path, attachment_meta });
+        } catch (err) {
+          markFailed(msg.id, attempt);
+          toast.error(errorMessage(err));
+        }
+      };
+      await attempt();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [insertMessage, conversationId, me.id],
+  );
+
+  /** Marks a snap as opened (server side, once) and returns when that happened. */
+  const openSnap = React.useCallback(
+    async (m: ChatMessage) => {
+      const { data, error } = await supabase.rpc("open_snap", { p_id: m.id });
+      if (error) throw error;
+      setMessages((prev) => prev.map((p) => (p.id === m.id ? { ...p, opened_at: data } : p)));
+      return data;
+    },
+    [supabase],
   );
 
   const editMessage = React.useCallback(
@@ -340,6 +380,8 @@ export function useConversation(conversationId: string) {
     loadAround,
     sendText,
     sendFile,
+    sendSnap,
+    openSnap,
     editMessage,
     deleteMessage,
     toggleReaction,

@@ -17,7 +17,7 @@
     "db:setup-sql": "node scripts/build-setup-sql.mjs",
     "db:types": "supabase gen types typescript --local > src/types/database.tmp && mv src/types/database.tmp src/types/database.ts",
     "test:db": "node scripts/test-db.mjs",
-    "test:unit": "node --experimental-strip-types --no-warnings scripts/test-sync.mjs && node scripts/test-integrations.mjs"
+    "test:unit": "node scripts/test-integrations.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

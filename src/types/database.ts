@@ -157,14 +157,14 @@ isOneToOne: false
                   ]
                 },"clips": {
                   Row: {
-                    "author_id": string,"caption": string | null,"created_at": string,"duration": number | null,"height": number | null,"id": string,"video_path": string,"width": number | null
+                    "author_id": string,"caption": string | null,"created_at": string,"duration": number | null,"height": number | null,"id": string,"place": string | null,"recorded_at": string | null,"video_path": string,"width": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "author_id"?: string,"caption"?: string | null,"created_at"?: string,"duration"?: number | null,"height"?: number | null,"id"?: string,"video_path": string,"width"?: number | null
+                    "author_id"?: string,"caption"?: string | null,"created_at"?: string,"duration"?: number | null,"height"?: number | null,"id"?: string,"place"?: string | null,"recorded_at"?: string | null,"video_path": string,"width"?: number | null
                   }
                   Update: {
-                    "author_id"?: string,"caption"?: string | null,"created_at"?: string,"duration"?: number | null,"height"?: number | null,"id"?: string,"video_path"?: string,"width"?: number | null
+                    "author_id"?: string,"caption"?: string | null,"created_at"?: string,"duration"?: number | null,"height"?: number | null,"id"?: string,"place"?: string | null,"recorded_at"?: string | null,"video_path"?: string,"width"?: number | null
                   }
                   Relationships: [
                     {
@@ -933,14 +933,14 @@ isOneToOne: false
                   ]
                 },"messages": {
                   Row: {
-                    "attachment_meta": NonNullable<Json>,"attachment_path": string | null,"body": string | null,"conversation_id": string,"created_at": string,"deleted_at": string | null,"edited_at": string | null,"id": string,"kind": string,"reply_to_id": string | null,"sender_id": string
+                    "attachment_meta": NonNullable<Json>,"attachment_path": string | null,"body": string | null,"conversation_id": string,"created_at": string,"deleted_at": string | null,"edited_at": string | null,"id": string,"kind": string,"opened_at": string | null,"reply_to_id": string | null,"sender_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "attachment_meta"?: NonNullable<Json>,"attachment_path"?: string | null,"body"?: string | null,"conversation_id": string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string,"kind"?: string,"reply_to_id"?: string | null,"sender_id"?: string
+                    "attachment_meta"?: NonNullable<Json>,"attachment_path"?: string | null,"body"?: string | null,"conversation_id": string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string,"kind"?: string,"opened_at"?: string | null,"reply_to_id"?: string | null,"sender_id"?: string
                   }
                   Update: {
-                    "attachment_meta"?: NonNullable<Json>,"attachment_path"?: string | null,"body"?: string | null,"conversation_id"?: string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string,"kind"?: string,"reply_to_id"?: string | null,"sender_id"?: string
+                    "attachment_meta"?: NonNullable<Json>,"attachment_path"?: string | null,"body"?: string | null,"conversation_id"?: string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string,"kind"?: string,"opened_at"?: string | null,"reply_to_id"?: string | null,"sender_id"?: string
                   }
                   Relationships: [
                     {
@@ -2184,11 +2184,17 @@ isOneToOne: false
 "mark_surprise_opened":
 { Args: { "surprise_id": string }; Returns: undefined
                            },
+"media_readable":
+{ Args: { "p_name": string }; Returns: boolean
+                           },
 "member_crud":
 { Args: { "owner_col"?: string,"t": string }; Returns: undefined
                            },
 "note_save":
 { Args: { "p_body": string,"p_id": string,"p_title": string,"p_version": number }; Returns: Json
+                           },
+"open_snap":
+{ Args: { "p_id": string }; Returns: string
                            },
 "partner_id":
 { Args: Record<PropertyKey, never>; Returns: string
@@ -2292,6 +2298,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "author_id": string,"created_at": string,"id": string,"kind": string,"reveal_at": string,"wrap": string
             }[]
+                           },
+"snap_deletable":
+{ Args: { "p_name": string }; Returns: boolean
                            },
 "spotify_save":
 { Args: { "p_name": string,"p_product": string,"p_user": string }; Returns: undefined

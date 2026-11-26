@@ -693,6 +693,61 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("moodboard: web images only from the search providers", !!evilImg.error);
   const evilCredit = await A.c.from("moodboard_items").insert({ kind: "web", url: "https://images.unsplash.com/photo-1", credit: { text: "x", url: "javascript:alert(1)" } });
   check("moodboard: credit links must be https", !!evilCredit.error);
+  // Snaps: open once, then gone
+  {
+    const jpg = new Blob([new Uint8Array([255, 216, 255, 224])], { type: "image/jpeg" });
+    const snapPath = `${A.id}/snaps/s-${Date.now()}.jpg`;
+    const up = await A.c.storage.from("media").upload(snapPath, jpg, { contentType: "image/jpeg" });
+    check("snaps: sender uploads into their snaps folder", !up.error, up.error?.message);
+    const plain = await A.c.from("messages").insert({ conversation_id: conv.id, kind: "image", attachment_path: snapPath });
+    check("snaps: snap files cannot be sent as normal photos", !!plain.error);
+    const noMedia = await A.c.from("messages").insert({ conversation_id: conv.id, kind: "snap", attachment_path: snapPath, attachment_meta: {} });
+    check("snaps: a snap must say photo or video", !!noMedia.error);
+    const wrongFolder = await A.c.from("messages").insert({ conversation_id: conv.id, kind: "snap", attachment_path: `${A.id}/chat/x.jpg`, attachment_meta: { media: "image" } });
+    check("snaps: only from the snaps folder", !!wrongFolder.error);
+    const snap = await A.c.from("messages").insert({ conversation_id: conv.id, kind: "snap", body: "hi", attachment_path: snapPath, attachment_meta: { media: "image", seconds: 5 }, opened_at: new Date().toISOString() }).select().single();
+    check("snaps: snap sent", !snap.error, snap.error?.message);
+    check("snaps: cannot be sent as already opened", snap.data?.opened_at === null);
+    const early = await L.c.storage.from("media").createSignedUrl(snapPath, 60);
+    check("snaps: recipient cannot load the file before opening", !early.data?.signedUrl);
+    const peek = await L.c.storage.from("media").list(`${A.id}/snaps`);
+    check("snaps: recipient cannot list the snaps folder", (peek.data ?? []).length === 0);
+    const cheat = await L.c.from("messages").update({ opened_at: null }).eq("id", snap.data.id).select();
+    check("snaps: open state cannot be changed by hand", !!cheat.error || (cheat.data ?? []).length === 0);
+    const editCap = await A.c.from("messages").update({ body: "changed" }).eq("id", snap.data.id).select();
+    check("snaps: caption cannot be edited", !!editCap.error);
+    const selfOpen = await A.c.rpc("open_snap", { p_id: snap.data.id });
+    check("snaps: sender cannot open their own snap", !!selfOpen.error);
+    const opened = await L.c.rpc("open_snap", { p_id: snap.data.id });
+    check("snaps: recipient opens it", !opened.error && !!opened.data, opened.error?.message);
+    const again = await L.c.rpc("open_snap", { p_id: snap.data.id });
+    check("snaps: opening twice keeps the first time", again.data === opened.data);
+    const view = await L.c.storage.from("media").createSignedUrl(snapPath, 60);
+    check("snaps: recipient can load it right after opening", !!view.data?.signedUrl, view.error?.message);
+    psql(`update public.messages set opened_at = now() - interval '11 minutes' where id = '${snap.data.id}'`);
+    const late = await L.c.storage.from("media").createSignedUrl(snapPath, 60);
+    check("snaps: gone for the recipient 10 minutes after opening", !late.data?.signedUrl);
+    psql(`update public.messages set opened_at = now() where id = '${snap.data.id}'`);
+    const del = await L.c.storage.from("media").remove([snapPath]);
+    const left = psql(`select count(*) from storage.objects where name = '${snapPath}'`);
+    check("snaps: recipient deletes the file after watching", !del.error && left === "0", del.error?.message ?? left);
+    const snap2Path = `${A.id}/snaps/s2-${Date.now()}.jpg`;
+    await A.c.storage.from("media").upload(snap2Path, jpg, { contentType: "image/jpeg" });
+    await A.c.from("messages").insert({ conversation_id: conv.id, kind: "snap", attachment_path: snap2Path, attachment_meta: { media: "image" } });
+    await L.c.storage.from("media").remove([snap2Path]);
+    const left2 = psql(`select count(*) from storage.objects where name = '${snap2Path}'`);
+    check("snaps: recipient cannot delete an unopened snap", left2 === "1", left2);
+    await A.c.storage.from("media").remove([snap2Path]);
+    psql("delete from public.messages where kind = 'snap'");
+  }
+  // Clips: when and where (place name only)
+  {
+    const clip = await A.c.from("clips").insert({ video_path: `${A.id}/clips/c.mp4`, place: "Kreuzberg, Berlin, Deutschland", recorded_at: "2026-11-20T17:03:12Z" }).select().single();
+    check("clips: place and recording time saved", !clip.error && clip.data.place === "Kreuzberg, Berlin, Deutschland", clip.error?.message);
+    const longPlace = await A.c.from("clips").insert({ video_path: `${A.id}/clips/d.mp4`, place: "x".repeat(200) });
+    check("clips: place length limited", !!longPlace.error);
+    psql("delete from public.clips");
+  }
   // Table privileges
   const trunc = psql("select count(*) from information_schema.role_table_grants where table_schema='public' and grantee in ('anon','authenticated') and privilege_type in ('TRUNCATE','TRIGGER','REFERENCES')");
   check("no TRUNCATE/TRIGGER/REFERENCES for client roles", trunc === "0", trunc);

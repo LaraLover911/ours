@@ -39,6 +39,9 @@ export type MessageMeta = {
   name?: string;
   waveform?: number[];
   deleted_kind?: string;
+  /** Snaps: what the snap holds and how long a photo stays on screen (0 = until tapped). */
+  media?: "image" | "video";
+  seconds?: number;
 };
 
 export type Pop = Row<"pops">;

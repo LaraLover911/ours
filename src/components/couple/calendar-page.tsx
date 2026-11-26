@@ -24,11 +24,11 @@ import type { Database } from "@/types/database";
 
 type CalEvent = Database["public"]["Tables"]["calendar_events"]["Row"];
 type Countdown = Database["public"]["Tables"]["countdowns"]["Row"];
-type Item = { id: string; title: string; start: Date; end?: Date | null; allDay: boolean; kind: "event" | "date" | "countdown" | "anniversary" | "capsule" | "google"; color: string; href?: string; event?: CalEvent };
+type Item = { id: string; title: string; start: Date; end?: Date | null; allDay: boolean; kind: "event" | "date" | "countdown" | "anniversary"; color: string; href?: string; event?: CalEvent };
 
 const COLORS: Record<string, string> = { rose: "bg-[#e8a3b8]", lavender: "bg-[#b9acdf]", sage: "bg-[#9fc2a6]", ocean: "bg-[#93b7d3]", peach: "bg-[#f0b79a]" };
-const KIND_COLOR: Record<Item["kind"], string> = { event: "", date: "bg-[#e8a3b8]", countdown: "bg-[#f0c86a]", anniversary: "bg-primary", capsule: "bg-[#b9acdf]", google: "bg-[#93b7d3]" };
-const KIND_LABEL: Record<Item["kind"], string> = { event: "Termin", date: "Date", countdown: "Countdown", anniversary: "Jahrestag", capsule: "Zeitkapsel", google: "Google (nur du)" };
+const KIND_COLOR: Record<Item["kind"], string> = { event: "", date: "bg-[#e8a3b8]", countdown: "bg-[#f0c86a]", anniversary: "bg-primary" };
+const KIND_LABEL: Record<Item["kind"], string> = { event: "Termin", date: "Date", countdown: "Countdown", anniversary: "Jahrestag" };
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 const dayKey = (d: Date) => berlinDateString(d);
@@ -47,12 +47,6 @@ export function CalendarPage() {
   const events = useQuery(async () => must(await supabase.from("calendar_events").select("*").order("starts_at")), [supabase]);
   const countdowns = useQuery(async () => must(await supabase.from("countdowns").select("*").order("target_at")), [supabase]);
   const dates = useQuery(async () => must(await supabase.from("date_ideas").select("id, title, planned_for, status").not("planned_for", "is", null)), [supabase]);
-  const capsules = useQuery(async () => must(await supabase.from("time_capsules").select("id, title, open_at")), [supabase]);
-  const google = useQuery(async () => {
-    const r = await fetch("/api/google/events?days=60", { cache: "no-store" }).catch(() => null);
-    if (!r?.ok) return [] as { id: string; title: string; start: string | null; end: string | null; allDay: boolean }[];
-    return (await r.json()).items as { id: string; title: string; start: string | null; end: string | null; allDay: boolean }[];
-  }, []);
   useRealtimeRefetch(["calendar_events"], () => void events.refetch());
   useRealtimeRefetch(["countdowns"], () => void countdowns.refetch());
 
@@ -61,8 +55,6 @@ export function CalendarPage() {
     for (const e of events.data ?? []) out.push({ id: e.id, title: e.title, start: new Date(e.starts_at), end: e.ends_at ? new Date(e.ends_at) : null, allDay: e.all_day, kind: "event", color: COLORS[e.color] ?? COLORS.rose, event: e });
     for (const d of dates.data ?? []) if (d.planned_for) out.push({ id: `d-${d.id}`, title: d.title, start: new Date(d.planned_for), allDay: false, kind: "date", color: KIND_COLOR.date, href: "/dates" });
     for (const c of countdowns.data ?? []) out.push({ id: `c-${c.id}`, title: `${c.emoji} ${c.title}`, start: new Date(c.target_at), allDay: false, kind: "countdown", color: KIND_COLOR.countdown });
-    for (const c of capsules.data ?? []) out.push({ id: `k-${c.id}`, title: `Zeitkapsel: ${c.title}`, start: new Date(c.open_at), allDay: false, kind: "capsule", color: KIND_COLOR.capsule, href: "/capsule" });
-    for (const g of google.data ?? []) if (g.start) out.push({ id: `g-${g.id}`, title: g.title, start: new Date(g.start), end: g.end ? new Date(g.end) : null, allDay: g.allDay, kind: "google", color: KIND_COLOR.google });
     if (settings.start_date) {
       const [sy, sm, sd] = settings.start_date.split("-").map(Number);
       for (let k = -1; k <= 13; k++) {
@@ -76,7 +68,7 @@ export function CalendarPage() {
       }
     }
     return out.sort((a, b) => a.start.getTime() - b.start.getTime());
-  }, [events.data, dates.data, countdowns.data, capsules.data, google.data, settings.start_date, month]);
+  }, [events.data, dates.data, countdowns.data, settings.start_date, month]);
 
   const byDay = React.useMemo(() => {
     const m = new Map<string, Item[]>();
@@ -181,7 +173,7 @@ export function CalendarPage() {
             })}
           </div>
           <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-muted-foreground">
-            {(["event", "date", "countdown", "anniversary", "capsule", "google"] as const).map((k) => (
+            {(["event", "date", "countdown", "anniversary"] as const).map((k) => (
               <span key={k} className="inline-flex items-center gap-1">
                 <span className={cn("size-2 rounded-full", k === "event" ? COLORS.rose : KIND_COLOR[k])} /> {KIND_LABEL[k]}
               </span>

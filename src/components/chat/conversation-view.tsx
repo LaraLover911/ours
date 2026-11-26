@@ -21,6 +21,7 @@ import { REACTION_EMOJIS } from "@/lib/constants";
 import type { Conversation, Message } from "@/types/app";
 import { Composer } from "./composer";
 import { MessageBubble } from "./message-bubble";
+import { SnapButton, SnapCamera, SnapViewer } from "./snap";
 import { previewText, type ChatMessage } from "./types";
 import { useConversation } from "./use-conversation";
 
@@ -115,6 +116,8 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
   const [atBottom, setAtBottom] = React.useState(true);
   const [newBelow, setNewBelow] = React.useState(0);
   const [lightbox, setLightbox] = React.useState<number | null>(null);
+  const [snapCamera, setSnapCamera] = React.useState(false);
+  const [viewing, setViewing] = React.useState<ChatMessage | null>(null);
   const initialScrollDone = React.useRef(false);
   const partnerTyping = typing[conversation.id];
 
@@ -236,6 +239,7 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
   }, []);
   const onActions = React.useCallback((m: ChatMessage) => setActionsFor(m), []);
   const onOpenMedia = React.useCallback((m: ChatMessage) => setLightbox(media.findIndex((x) => x.id === m.id)), [media]);
+  const onOpenSnap = React.useCallback((m: ChatMessage) => setViewing(m), []);
   const onReact = c.toggleReaction;
 
   const status = partnerTyping ? `${partner?.display_name ?? ""} tippt gerade…` : presence.online ? (presence.activity === "chat" ? "ist im Chat" : presence.label) : presence.label;
@@ -268,6 +272,7 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
         <button onClick={() => setSearchOpen((s) => !s)} className="grid size-11 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Im Chat suchen" aria-expanded={searchOpen}>
           <Search className="size-5" />
         </button>
+        <SnapButton onClick={() => setSnapCamera(true)} className="ml-0.5" />
         {searchOpen ? (
           <ChatSearch
             conversationId={conversation.id}
@@ -345,6 +350,7 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
                     onActions={onActions}
                     onReact={onReact}
                     onOpenMedia={onOpenMedia}
+                    onOpenSnap={onOpenSnap}
                     onJumpTo={(id) => void jumpTo(id)}
                   />
                 </li>
@@ -412,7 +418,7 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
                 </div>
                 <ul className="overflow-hidden rounded-2xl border border-border">
                   <ActionItem icon={<CornerUpLeft />} label="Antworten" onClick={() => { onReply(actionsFor); setActionsFor(null); }} />
-                  {actionsFor.body ? (
+                  {actionsFor.body && actionsFor.kind !== "snap" ? (
                     <ActionItem
                       icon={<Copy />}
                       label="Kopieren"
@@ -448,6 +454,19 @@ export function ConversationView({ conversation, showBack }: { conversation: Con
       </Dialog>
 
       <Lightbox items={lightboxItems} index={lightbox} onIndexChange={setLightbox} onClose={() => setLightbox(null)} />
+
+      {snapCamera ? (
+        <SnapCamera
+          to={partner?.display_name ?? "dich"}
+          onClose={() => setSnapCamera(false)}
+          onSend={(d) => {
+            setSnapCamera(false);
+            void c.sendSnap(d.file, { media: d.media, caption: d.caption, seconds: d.seconds, duration: d.duration, width: d.width, height: d.height });
+            window.setTimeout(() => scrollToBottom(), 50);
+          }}
+        />
+      ) : null}
+      {viewing ? <SnapViewer m={viewing} open={c.openSnap} onClose={() => setViewing(null)} /> : null}
     </section>
   );
 }

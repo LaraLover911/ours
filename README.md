@@ -15,17 +15,16 @@ Die App erfindet nichts: keine gemeinsamen Erinnerungen, keine Daten und keine F
 | --- | --- |
 | **Login & Sicherheit** | Login, Registrierung nur für eingeladene E-Mails, Logout, Passwort vergessen/zurücksetzen, geschützte Routen. Datenbankseitig sind maximal 2 Konten möglich. Row Level Security auf jeder Tabelle. |
 | **Home** | Hero „somewhere between / you & me.“, Love Counter (Startdatum einstellbar), nächster Jahrestag, Countdown zum nächsten Date, gemeinsame Notiz, letzte Erinnerung, letzte Chatnachricht, Schnellzugriff. |
-| **Chat** | Echtzeit-Nachrichten, Online-Status, „tippt gerade…“, Lesebestätigung, Antworten, Bearbeiten, Löschen, Reaktionen, Bilder, Videos, Sprachnachrichten, Suche, Entwürfe, ungelesene Nachrichten, mehrere Unterhaltungen, Benachrichtigungen im Browser (solange die App offen ist). |
+| **Chat** | Echtzeit-Nachrichten, Online-Status, „tippt gerade…“, Lesebestätigung, Antworten, Bearbeiten, Löschen, Reaktionen, Bilder, Videos, Sprachnachrichten, **Snaps** (Foto oder Video direkt aus der Kamera, kann einmal geöffnet werden und wird danach gelöscht; Button rechts neben dem Namen), Suche, Entwürfe, ungelesene Nachrichten, mehrere Unterhaltungen, Benachrichtigungen im Browser (solange die App offen ist). |
 | **Memories** | Masonry-Album, Kategorien, Favoriten, Lightbox mit Wischen, Kommentare, Timeline „our story so far“. |
 | **Love Letters** | „Open when…“-Kategorien, Umschlag-Animation, zeitgesteuert (bleiben bis zum Datum versiegelt, auch in der Datenbank), privat oder geteilt. |
 | **Diary** | Abdullahs, Laras und gemeinsame Einträge, Stimmung, Fotos, Kommentare. Private Einträge sieht wirklich nur der Ersteller. |
 | **Dates** | Ideen sammeln, abstimmen, planen, Kalenderansicht, Status. |
 | **Daily Questions** | Eine Frage pro Tag, eigene Fragen. Die Antwort des anderen erscheint erst, wenn beide geantwortet haben (in der Datenbank erzwungen). |
 | **Mini Games** | How well do you know me?, Who is more likely to?, This or That, Couple Quiz, Guess the Memory, Random Date Generator. Antworten werden gespeichert und synchronisiert. |
-| **Music** | Gemeinsame Spotify-Playlist (offizieller Embed), Songs mit Widmung. Es wird keine Musik illegal abgespielt. |
 | **Surprises** | Geschenke, Nachrichten und versteckte Überraschungen mit Timer und Geschenkpapier-Animation. |
 | **Studio** | Geheime Überraschungen für den anderen: Jumpscare (mit eigenem Gruselbild/-video oder eingebautem Gesicht und synthetischem Schrei), Video, Foto oder Nachricht. Sie erscheinen im Vollbild, sobald der andere ours. das nächste Mal öffnet. Zuerst kommt eine harmlose Karte („Ich hab dir was Süßes geschickt 💌“), der Tipp darauf startet den Ton. Im Studio siehst du, wann es gesehen wurde. |
-| **Clips** | Eigener Video-Feed wie TikTok: Hochformat-Videos hochladen (bis 50 MB), vertikal durchwischen, Autoplay, Ton an/aus, Doppeltipp = Herz, Likes in Echtzeit. |
+| **Clips** | Eigener Video-Feed wie TikTok: Hochformat-Videos hochladen (bis 50 MB), vertikal durchwischen, Autoplay, Ton an/aus, Doppeltipp = Herz, Likes in Echtzeit. Umschalten zwischen neuesten und ältesten Clips, genaues Upload-Datum, Aufnahmedatum und Ort aus den Metadaten des Videos (nur der Ortsname, abschaltbar vor dem Posten). |
 | **Anrufe** | Video- und Sprachanrufe direkt im Browser (WebRTC, Ende-zu-Ende verschlüsselt): Klingeln, Annehmen/Ablehnen, Stummschalten, Kamera aus, Kamera wechseln. Bis 1080p, Opus-Audio mit 128 kbit/s. Anrufen über Home oder den Chat. |
 | **Status** | „Heute denke ich…“ (gilt nur für den Tag) und letzte Aktivität des anderen („schaut Clips“, „zuletzt aktiv vor 5 Minuten · Chat“). Respektiert die Einstellung „Online-Status zeigen“. |
 | **Settings** | Profil, Profilbild, Startdatum, Hero-/Hintergrundbild, Farben, Hell/Dunkel, Benachrichtigungen, Privatsphäre, Konto. |
@@ -115,7 +114,7 @@ Sonst funktionieren die Links in Bestätigungs- und Passwort-Mails nicht.
 
 **Niemals** den `service_role`- oder `secret`-Key verwenden. Die App braucht ihn nicht, und er gehört weder ins Frontend noch zu GitHub. `.env.local` steht in `.gitignore`.
 
-Optionale Dienste (Spotify, Google Kalender, Discord, YouTube, GIPHY, Tenor, Unsplash, TMDB, TURN für Anrufe) richtest du mit **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)** ein.
+Optionale Dienste (GIPHY, Tenor, Unsplash, TMDB, TURN für Anrufe) richtest du mit **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)** ein.
 
 ### 5. Lokal starten
 
@@ -156,7 +155,8 @@ Ohne Fotos zeigt die App überall schöne Platzhalter.
 - **Jumpscare-Ton:** Browser erlauben Ton erst nach einem Tipp. Deshalb kommt zuerst die harmlose Karte.
 
 - **Benachrichtigungen** kommen, solange ours. in einem Tab oder als installierte App geöffnet ist. Echte Push-Nachrichten bei komplett geschlossener App bräuchten zusätzlich einen Push-Dienst mit Server-Schlüssel und sind bewusst nicht eingebaut.
-- **Spotify:** Die App bettet nur den offiziellen Spotify-Player ein. Ob ganze Songs laufen, hängt von eurem Spotify-Konto ab.
+- **Snaps:** Ein Browser kann Screenshots nicht erkennen oder verhindern. „Einmal öffnen“ ist in der Datenbank erzwungen, schützt aber nicht vor einem Bildschirmfoto.
+- **Ort bei Clips:** Steht nur in Videos, die die Kamera-App mit Ort aufgenommen hat (iPhone/Android mit Ortungsdienst für die Kamera). Bildschirmaufnahmen und viele weitergeleitete Videos haben keinen Ort.
 - **Mobil-Performance:** Die Seiten laden ihre Daten nach dem Start im Browser. Auf langsamen Verbindungen erscheinen deshalb kurz Skeleton-Platzhalter (siehe Lighthouse-Werte oben).
 
 ## Für Entwickler

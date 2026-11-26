@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Bell, Camera, EyeOff, Fingerprint, Globe2, MapPinOff, Mic, Plug, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { Bell, Camera, EyeOff, Fingerprint, Globe2, MapPinOff, Mic, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { useApp } from "@/components/providers/app-provider";
 import { PageContainer } from "@/components/navigation/app-shell";
 import { PageHeader } from "@/components/shared/states";
@@ -13,10 +13,10 @@ import { useQuery } from "@/hooks/use-query";
 
 type PermState = "granted" | "denied" | "prompt" | "unsupported";
 const PERMS: { name: string; label: string; icon: React.ComponentType<{ className?: string }>; why: string }[] = [
-  { name: "camera", label: "Kamera", icon: Camera, why: "Nur bei Videoanrufen, wenn du auf Anrufen oder Annehmen tippst." },
-  { name: "microphone", label: "Mikrofon", icon: Mic, why: "Nur bei Anrufen und Sprachnachrichten, wenn du sie startest." },
+  { name: "camera", label: "Kamera", icon: Camera, why: "Nur bei Videoanrufen und Snaps, wenn du sie selbst startest." },
+  { name: "microphone", label: "Mikrofon", icon: Mic, why: "Nur bei Anrufen, Sprachnachrichten und Video-Snaps, wenn du sie startest." },
   { name: "notifications", label: "Benachrichtigungen", icon: Bell, why: "Für Push-Benachrichtigungen, die du selbst aktivierst." },
-  { name: "geolocation", label: "Standort", icon: MapPinOff, why: "ours. fragt nie nach deinem Standort." },
+  { name: "geolocation", label: "Standort", icon: MapPinOff, why: "ours. fragt nie nach deinem Standort. Einen Ort aus den Metadaten eines Clips zeigt ours. nur, wenn du ihn beim Hochladen selbst übernimmst." },
 ];
 
 const PERM_TEXT: Record<PermState, string> = { granted: "erlaubt", denied: "blockiert", prompt: "noch nicht gefragt", unsupported: "nicht abfragbar" };
@@ -52,10 +52,6 @@ export function PrivacyPage() {
 
   const subs = useQuery(async () => (await supabase.from("push_subscriptions").select("id, label")).data ?? [], [supabase]);
   const prefs = useQuery(async () => (await supabase.from("notification_prefs").select("categories, previews").eq("user_id", me.id).maybeSingle()).data, [supabase, me.id]);
-  const integrations = useQuery(async () => {
-    const { data, error } = await supabase.from("integration_connections").select("provider, scopes, connected_at").eq("user_id", me.id);
-    return error ? null : (data ?? []);
-  }, [supabase, me.id]);
 
   const offCategories = Object.entries((prefs.data?.categories ?? {}) as Record<string, boolean>).filter(([, v]) => v === false).length;
 
@@ -68,7 +64,7 @@ export function PrivacyPage() {
             just <em className="text-primary">us two</em>
           </>
         }
-        description={`Alles, was ${partnerName} über dich sieht, welche Dienste verbunden sind und was ours. nie erfasst.`}
+        description={`Alles, was ${partnerName} über dich sieht und was ours. nie erfasst.`}
       />
 
       <div className="grid gap-5">
@@ -78,9 +74,6 @@ export function PrivacyPage() {
           </Row>
           <Row label="Aktuelle Aktivität" hint="z. B. „ist im Chat“, „telefoniert gerade“, „schaut Clips“">
             <Switch checked={me.share_activity !== false} onCheckedChange={(v) => updateMe({ share_activity: v })} aria-label="Aktivität teilen" />
-          </Row>
-          <Row label="Aktivitäts-Zeitleiste" hint={<>Einträge in <Link className="underline" href="/activity">Our Activity</Link>, standardmäßig aus</>}>
-            <Switch checked={me.share_activity_feed === true} onCheckedChange={(v) => updateMe({ share_activity_feed: v })} aria-label="Aktivitäts-Zeitleiste" />
           </Row>
           <Row label="Lesebestätigungen" hint="Aus: ihr seht beide kein „Gelesen“">
             <Switch checked={me.read_receipts} onCheckedChange={(v) => updateMe({ read_receipts: v })} aria-label="Lesebestätigungen" />
@@ -102,27 +95,6 @@ export function PrivacyPage() {
           }
         >
           <p className="text-[13px] text-muted-foreground">Benachrichtigungen enthalten nie Inhalte von Briefen oder Überraschungen und werden nie über deine eigenen Aktionen geschickt.</p>
-        </Section>
-
-        <Section
-          icon={<Plug />}
-          title="Integrationen"
-          description={
-            integrations.data == null
-              ? "Noch keine Integration eingerichtet."
-              : integrations.data.length
-                ? `${integrations.data.length} verbunden: ${integrations.data.map((i) => i.provider).join(", ")}`
-                : "Kein Dienst mit deinem Konto verbunden."
-          }
-          actions={
-            <Button size="sm" variant="outline" asChild>
-              <Link href="/integrations">Ansehen</Link>
-            </Button>
-          }
-        >
-          <p className="text-[13px] text-muted-foreground">
-            Zugangsschlüssel liegen nur auf dem Server, nie im Browser oder im Code. Tokens werden verschlüsselt gespeichert, du kannst jede Verbindung jederzeit trennen. Fürs Wetter speicherst du nur eine Stadt, die du selbst eintippst. Es wird kein Standort abgefragt und keine IP-Adresse ausgewertet.
-          </p>
         </Section>
 
         <Section icon={<ShieldCheck />} title="Browser-Berechtigungen" description="Was dieser Browser ours. gerade erlaubt. Ändern kannst du das in den Website-Einstellungen deines Browsers.">

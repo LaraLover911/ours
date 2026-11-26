@@ -15,7 +15,7 @@ export type MediaItem = {
   meta?: Record<string, string | number | null>;
 };
 
-export const MEDIA_PROVIDERS = ["giphy", "tenor", "unsplash", "tmdb", "youtube"] as const;
+export const MEDIA_PROVIDERS = ["giphy", "tenor", "unsplash", "tmdb"] as const;
 export type MediaProvider = (typeof MEDIA_PROVIDERS)[number];
 
 /** Attribution the providers require next to their results. */
@@ -24,7 +24,6 @@ export const MEDIA_NOTICE: Record<MediaProvider, string> = {
   tenor: "Via Tenor",
   unsplash: "Fotos von Unsplash",
   tmdb: "Daten von TMDB. Dieses Produkt nutzt die TMDB-API, ist aber nicht von TMDB unterstützt oder zertifiziert.",
-  youtube: "Ergebnisse von YouTube",
 };
 
 const UTM = "utm_source=ours&utm_medium=referral";
@@ -92,19 +91,5 @@ export async function searchMedia(provider: MediaProvider, q: string): Promise<M
           meta: { kind: m.media_type, year: (m.release_date ?? m.first_air_date ?? "").slice(0, 4) || null, overview: (m.overview ?? "").slice(0, 400) },
         }));
     }
-    case "youtube": {
-      type Y = { id: { videoId: string }; snippet: { title: string; channelTitle: string; thumbnails: { medium?: { url: string } } } };
-      const r = await getJson<{ items: Y[] }>(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=12&q=${enc}&key=${process.env.YOUTUBE_API_KEY}`,
-        undefined,
-        "YouTube",
-      );
-      return r.items.flatMap((y) => {
-        const thumb = https(y.snippet.thumbnails.medium?.url);
-        return thumb ? [{ id: y.id.videoId, title: decode(y.snippet.title), subtitle: decode(y.snippet.channelTitle), thumb, link: `https://www.youtube.com/watch?v=${y.id.videoId}` }] : [];
-      });
-    }
   }
 }
-
-const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");

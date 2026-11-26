@@ -125,7 +125,7 @@ async function handleEvent(cfg: Config, type: string, id: string) {
     case "chat": {
       const { data: m } = await admin.from("messages").select("id, conversation_id, sender_id, kind, body").eq("id", id).single();
       if (!m) return [];
-      const what: Record<string, string> = { image: "📷 Foto", video: "🎬 Video", audio: "🎙️ Sprachnachricht", file: "📎 Datei" };
+      const what: Record<string, string> = { image: "📷 Foto", video: "🎬 Video", audio: "🎙️ Sprachnachricht", file: "📎 Datei", snap: "📸 hat dir einen Snap geschickt" };
       return notifyPartnerOf(cfg, m.sender_id, `chat:${id}`, (name, previews) => ({
         title: name,
         body: previews ? (m.kind === "text" ? short(m.body, 180) : (what[m.kind] ?? "Neue Nachricht")) : "Neue Nachricht",

@@ -1,5 +1,4 @@
 import "server-only";
-import { canEncrypt } from "./crypto";
 
 /**
  * Which external services the server is set up for. Only names of missing
@@ -11,17 +10,9 @@ const need = (...vars: string[]): Check => {
   const missing = vars.filter((v) => !process.env[v]);
   return { configured: missing.length === 0, missing };
 };
-const withKey = (c: Check): Check => (canEncrypt() ? c : { configured: false, missing: [...c.missing, "INTEGRATIONS_ENCRYPTION_KEY"] });
 
 export function integrationStatus() {
   return {
-    spotify: withKey(need("SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET")),
-    google_calendar: withKey(need("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET")),
-    discord: withKey({ configured: true, missing: [] }),
-    open_meteo: { configured: true, missing: [] },
-    osm: { configured: true, missing: [] },
-    youtube: { configured: true, missing: [] },
-    youtube_search: need("YOUTUBE_API_KEY"),
     giphy: need("GIPHY_API_KEY"),
     tenor: need("TENOR_API_KEY"),
     unsplash: need("UNSPLASH_ACCESS_KEY"),

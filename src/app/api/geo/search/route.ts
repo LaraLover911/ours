@@ -4,7 +4,7 @@ import { getJson, rateLimited } from "@/lib/server/integrations";
 
 type Hit = { name: string; latitude: number; longitude: number; country?: string; admin1?: string; timezone?: string };
 
-/** Place search for a city you type (Open-Meteo geocoding, no key, no geolocation, no IP lookup). */
+/** Place search for a place you type (Open-Meteo geocoding, no key, no geolocation, no IP lookup). */
 export async function GET(req: NextRequest) {
   const auth = await requireMember();
   if ("error" in auth) return auth.error;

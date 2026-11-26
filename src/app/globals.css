@@ -285,3 +285,9 @@ html.lenis, html.lenis body { height: auto; }
 
 /* Map zoom buttons: comfortable touch targets (40px) on phones. */
 .leaflet-container.leaflet-touch .leaflet-bar a { width: 40px; height: 40px; line-height: 40px; }
+
+/* Snap camera: recording ring fills over the max video length. */
+@keyframes snap-ring {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}

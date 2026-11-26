@@ -34,7 +34,7 @@ export function MapPage() {
 
   const search = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = await fetch(`/api/weather/geocode?q=${encodeURIComponent(q)}`).catch(() => null);
+    const r = await fetch(`/api/geo/search?q=${encodeURIComponent(q)}`).catch(() => null);
     const j = r ? await r.json().catch(() => ({})) : {};
     if (!r?.ok) return toast.error(j.error ?? "Ortssuche nicht erreichbar");
     setHits(j.items);

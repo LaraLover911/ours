@@ -12,6 +12,7 @@ import { formatTime } from "@/lib/utils/dates";
 import type { Reaction } from "@/types/app";
 import { metaOf, previewText, type ChatMessage } from "./types";
 import { VoicePlayer } from "./voice";
+import { SnapBubble } from "./snap";
 
 const URL_RE = /(https?:\/\/[^\s<]+[^\s<.,:;"')\]!?])/g;
 
@@ -116,6 +117,7 @@ export const MessageBubble = React.memo(function MessageBubble({
   onActions,
   onReact,
   onOpenMedia,
+  onOpenSnap,
   onJumpTo,
 }: {
   m: ChatMessage;
@@ -131,6 +133,7 @@ export const MessageBubble = React.memo(function MessageBubble({
   onActions: (m: ChatMessage) => void;
   onReact: (m: ChatMessage, emoji: string) => void;
   onOpenMedia: (m: ChatMessage) => void;
+  onOpenSnap?: (m: ChatMessage) => void;
   onJumpTo: (id: string) => void;
 }) {
   const { profiles, nameOf } = useApp();
@@ -211,6 +214,8 @@ export const MessageBubble = React.memo(function MessageBubble({
               <div className={cn("border border-dashed border-border-strong px-3.5 py-2 text-[14px] text-muted-foreground italic", bubbleShape)}>
                 Nachricht gelöscht
               </div>
+            ) : m.kind === "snap" ? (
+              <SnapBubble m={m} mine={mine} onOpen={(x) => onOpenSnap?.(x)} />
             ) : isMedia ? (
               <div className={cn("relative overflow-hidden", bubbleShape)}>
                 <MediaThumb m={m} onOpen={() => onOpenMedia(m)} />
