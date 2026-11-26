@@ -109,7 +109,9 @@ export function PlayLobby() {
         description={`Echte Spiele zu zweit, live auf euren Geräten. Jeder Zug wird vom Server geprüft. ${presence.online ? `${partnerName} ist gerade online.` : `${partnerName} ist gerade offline und bekommt deine Einladung als Benachrichtigung, falls aktiviert.`}`}
       />
 
-      {incoming.length || outgoing.length || running.length ? (
+      {/* Invitations stay on top (they are what you came for); running games sit
+          below the game grid so their late arrival does not push the page. */}
+      {incoming.length ? (
         <div className="mb-6 grid gap-3">
           {incoming.map((r) => {
             const g = GAME_BY_ID[r.game as GameId];
@@ -131,25 +133,6 @@ export function PlayLobby() {
                   </Button>
                 </div>
               </motion.div>
-            );
-          })}
-          {[...running, ...outgoing].map((r) => {
-            const g = GAME_BY_ID[r.game as GameId];
-            const yourTurn = r.status === "active" && r.turn === me.id;
-            return (
-              <Link key={r.id} href={`/play/${r.id}`} className="card-surface flex items-center gap-3 p-4 transition-colors hover:bg-muted/50">
-                <span className="grid size-10 place-items-center rounded-xl bg-primary-soft text-primary">
-                  <g.icon className="size-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{g.title}</p>
-                  <p className="truncate text-[13px] text-muted-foreground">
-                    {r.status === "invited" ? `wartet auf ${partnerName}` : yourTurn ? "du bist dran" : r.turn ? `${partnerName} ist dran` : "läuft"} · {timeAgo(r.updated_at)}
-                  </p>
-                </div>
-                {yourTurn ? <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">dein Zug</span> : null}
-                <ChevronRight className="size-4 text-muted-foreground" />
-              </Link>
             );
           })}
         </div>
@@ -185,6 +168,30 @@ export function PlayLobby() {
           })}
         </div>
       </Section>
+
+      {running.length || outgoing.length ? (
+        <div className="mt-5 grid gap-3" aria-label="Laufende Spiele">
+          {[...running, ...outgoing].map((r) => {
+            const g = GAME_BY_ID[r.game as GameId];
+            const yourTurn = r.status === "active" && r.turn === me.id;
+            return (
+              <Link key={r.id} href={`/play/${r.id}`} className="card-surface flex items-center gap-3 p-4 transition-colors hover:bg-muted/50">
+                <span className="grid size-10 place-items-center rounded-xl bg-primary-soft text-primary">
+                  <g.icon className="size-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{g.title}</p>
+                  <p className="truncate text-[13px] text-muted-foreground">
+                    {r.status === "invited" ? `wartet auf ${partnerName}` : yourTurn ? "du bist dran" : r.turn ? `${partnerName} ist dran` : "läuft"} · {timeAgo(r.updated_at)}
+                  </p>
+                </div>
+                {yourTurn ? <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">dein Zug</span> : null}
+                <ChevronRight className="size-4 text-muted-foreground" />
+              </Link>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.4fr]">
         <Section icon={<Trophy />} title="Punktestand" description="Gewonnene Spiele, nur Spiele mit Gewinner.">

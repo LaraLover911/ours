@@ -314,7 +314,7 @@ export function MemoriesPage() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {data?.length ? (
+          {loading || data?.length ? (
             <TabsList>
               <TabsTrigger value="album">Album</TabsTrigger>
               <TabsTrigger value="timeline">Timeline</TabsTrigger>

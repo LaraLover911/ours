@@ -124,7 +124,7 @@ function DeviceCard({
               <span className="truncate">{d.name}</span>
               {here ? <span className="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-normal text-primary">dieses Gerät</span> : null}
               {onRename ? (
-                <button type="button" aria-label="Umbenennen" className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted" onClick={() => setEditing(true)}>
+                <button type="button" aria-label="Umbenennen" className="relative shrink-0 rounded-md p-1 after:absolute after:-inset-2 after:content-[''] text-muted-foreground hover:bg-muted" onClick={() => setEditing(true)}>
                   <Pencil className="size-3.5" />
                 </button>
               ) : null}
