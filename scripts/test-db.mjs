@@ -642,6 +642,61 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("map: places can be added", !place.error, place.error?.message);
   const badPlace = await A.c.from("places").insert({ name: "Nowhere", lat: 120, lon: 0 });
   check("map: coordinates validated", !!badPlace.error);
+  // Storage: sealed media stays sealed in the storage API too (not only in the tables)
+  {
+    psql("delete from public.daily_photos");
+    const png = new Blob([new Uint8Array([137, 80, 78, 71])], { type: "image/png" });
+    const capPath = `${A.id}/capsule/c-${Date.now()}.png`;
+    await A.c.storage.from("media").upload(capPath, png, { contentType: "image/png" });
+    await A.c.from("uploads").insert({ path: capPath, kind: "image", mime: "image/png", size: 4 }).then(() => null, () => null);
+    const sealedCap = await A.c.rpc("capsule_create", { p_title: "Bild für später", p_open_at: new Date(Date.now() + 2 * 3600e3).toISOString(), p_body: "mit Foto", p_media: [capPath] });
+    check("storage: capsule with own photo created", !sealedCap.error, sealedCap.error?.message);
+    const listCap = await L.c.storage.from("media").list(`${A.id}/capsule`);
+    check("storage: partner cannot list the capsule folder", (listCap.data ?? []).length === 0);
+    const signCap = await L.c.storage.from("media").createSignedUrl(capPath, 60);
+    check("storage: partner cannot sign capsule media before it opens", !signCap.data?.signedUrl);
+    const dlCap = await L.c.storage.from("media").download(capPath);
+    check("storage: partner cannot download capsule media before it opens", !!dlCap.error || !dlCap.data);
+    const upRows = await L.c.from("uploads").select("path").eq("path", capPath);
+    check("storage: upload index hides sealed paths", (upRows.data ?? []).length === 0);
+    const ownCap = await A.c.storage.from("media").createSignedUrl(capPath, 60);
+    check("storage: author can still see their own capsule media", !!ownCap.data?.signedUrl);
+    psql(`update public.time_capsules set created_at = now() - interval '3 hours', open_at = now() - interval '1 minute' where id = '${sealedCap.data}'`);
+    const signOpen = await L.c.storage.from("media").createSignedUrl(capPath, 60);
+    check("storage: capsule media readable once open", !!signOpen.data?.signedUrl, signOpen.error?.message);
+
+    const phPath = `${A.id}/photo/p-${Date.now()}.png`;
+    await A.c.storage.from("media").upload(phPath, png, { contentType: "image/png" });
+    await A.c.from("daily_photos").insert({ path: phPath });
+    const signPh = await L.c.storage.from("media").createSignedUrl(phPath, 60);
+    check("storage: partner cannot open today's photo before posting", !signPh.data?.signedUrl);
+    const listPh = await L.c.storage.from("media").list(`${A.id}/photo`);
+    check("storage: partner cannot list the photo folder", (listPh.data ?? []).length === 0);
+    const lPath = `${L.id}/photo/l-${Date.now()}.png`;
+    await L.c.storage.from("media").upload(lPath, png, { contentType: "image/png" });
+    await L.c.from("daily_photos").insert({ path: lPath });
+    const signPh2 = await L.c.storage.from("media").createSignedUrl(phPath, 60);
+    check("storage: photo opens after posting your own", !!signPh2.data?.signedUrl, signPh2.error?.message);
+
+    const popPath = `${A.id}/studio/s-${Date.now()}.png`;
+    await A.c.storage.from("media").upload(popPath, png, { contentType: "image/png" });
+    const signPop0 = await L.c.storage.from("media").createSignedUrl(popPath, 60);
+    check("storage: studio media hidden until it is sent", !signPop0.data?.signedUrl);
+    await A.c.from("pops").insert({ recipient_id: L.id, kind: "image", media_path: popPath });
+    const signPop = await L.c.storage.from("media").createSignedUrl(popPath, 60);
+    check("storage: recipient can open the pop media", !!signPop.data?.signedUrl, signPop.error?.message);
+    psql("delete from public.pops");
+    await A.c.storage.from("media").remove([capPath, phPath, popPath]);
+    await L.c.storage.from("media").remove([lPath]);
+  }
+  const evilImg = await A.c.from("moodboard_items").insert({ kind: "web", url: "https://tracker.example.com/pixel.gif" });
+  check("moodboard: web images only from the search providers", !!evilImg.error);
+  const evilCredit = await A.c.from("moodboard_items").insert({ kind: "web", url: "https://images.unsplash.com/photo-1", credit: { text: "x", url: "javascript:alert(1)" } });
+  check("moodboard: credit links must be https", !!evilCredit.error);
+  // Table privileges
+  const trunc = psql("select count(*) from information_schema.role_table_grants where table_schema='public' and grantee in ('anon','authenticated') and privilege_type in ('TRUNCATE','TRIGGER','REFERENCES')");
+  check("no TRUNCATE/TRIGGER/REFERENCES for client roles", trunc === "0", trunc);
+
   psql(`update public.couple_settings set start_date = ${oldStart ? `'${oldStart}'` : "null"}`);
   psql("delete from public.places; delete from public.watch_items; delete from public.shared_notes; delete from public.voice_notes; delete from public.daily_photos; delete from public.wishlist_items; delete from public.time_capsules; delete from public.countdowns; delete from public.couple_reminders; delete from public.challenge_done");
 }
