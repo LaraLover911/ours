@@ -43,6 +43,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"calendar_events": {
+                  Row: {
+                    "all_day": boolean,"color": string,"created_at": string,"created_by": string,"ends_at": string | null,"id": string,"location": string | null,"note": string | null,"starts_at": string,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "all_day"?: boolean,"color"?: string,"created_at"?: string,"created_by"?: string,"ends_at"?: string | null,"id"?: string,"location"?: string | null,"note"?: string | null,"starts_at": string,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "all_day"?: boolean,"color"?: string,"created_at"?: string,"created_by"?: string,"ends_at"?: string | null,"id"?: string,"location"?: string | null,"note"?: string | null,"starts_at"?: string,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "calendar_events_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"calls": {
                   Row: {
                     "accepted_at": string | null,"callee_id": string,"caller_id": string,"connected_at": string | null,"created_at": string,"end_reason": string | null,"ended_at": string | null,"id": string,"kind": string,"status": string
@@ -68,6 +88,46 @@ isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
+                  ]
+                },"challenge_done": {
+                  Row: {
+                    "challenge_id": number,"created_at": string,"day": string,"note": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "challenge_id": number,"created_at"?: string,"day"?: string,"note"?: string | null,"user_id"?: string
+                  }
+                  Update: {
+                    "challenge_id"?: number,"created_at"?: string,"day"?: string,"note"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "challenge_done_challenge_id_fkey"
+      columns: ["challenge_id"]
+isOneToOne: false
+      referencedRelation: "challenges"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "challenge_done_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"challenges": {
+                  Row: {
+                    "body": string,"category": string,"id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"category": string,"id": number
+                  }
+                  Update: {
+                    "body"?: string,"category"?: string,"id"?: number
+                  }
+                  Relationships: [
+                    
                   ]
                 },"clip_likes": {
                   Row: {
@@ -161,6 +221,40 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"countdowns": {
+                  Row: {
+                    "created_at": string,"created_by": string,"emoji": string,"id": string,"notify": boolean,"target_at": string,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"emoji"?: string,"id"?: string,"notify"?: boolean,"target_at": string,"title": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"emoji"?: string,"id"?: string,"notify"?: boolean,"target_at"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "countdowns_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"couple_reminders": {
+                  Row: {
+                    "created_at": string,"day": string,"id": number,"kind": string,"ref": string,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"day": string,"id"?: never,"kind": string,"ref": string,"title": string
+                  }
+                  Update: {
+                    "created_at"?: string,"day"?: string,"id"?: never,"kind"?: string,"ref"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"couple_settings": {
                   Row: {
                     "background_image": string | null,"hero_image": string | null,"home_message": string | null,"home_message_by": string | null,"id": number,"spotify_playlist_url": string | null,"start_date": string | null,"updated_at": string,"updated_by": string | null
@@ -182,6 +276,26 @@ isOneToOne: false
     },{
       foreignKeyName: "couple_settings_updated_by_fkey"
       columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"daily_photos": {
+                  Row: {
+                    "caption": string | null,"created_at": string,"day": string,"id": string,"path": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "caption"?: string | null,"created_at"?: string,"day"?: string,"id"?: string,"path": string,"user_id"?: string
+                  }
+                  Update: {
+                    "caption"?: string | null,"created_at"?: string,"day"?: string,"id"?: string,"path"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "daily_photos_user_id_fkey"
+      columns: ["user_id"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
@@ -480,6 +594,58 @@ isOneToOne: false
       columns: ["room_id"]
 isOneToOne: true
       referencedRelation: "game_rooms"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"goal_steps": {
+                  Row: {
+                    "created_at": string,"created_by": string,"done_at": string | null,"done_by": string | null,"goal_id": string,"id": string,"sort": number,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"done_at"?: string | null,"done_by"?: string | null,"goal_id": string,"id"?: string,"sort"?: number,"title": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"done_at"?: string | null,"done_by"?: string | null,"goal_id"?: string,"id"?: string,"sort"?: number,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "goal_steps_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "goal_steps_done_by_fkey"
+      columns: ["done_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "goal_steps_goal_id_fkey"
+      columns: ["goal_id"]
+isOneToOne: false
+      referencedRelation: "goals"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"goals": {
+                  Row: {
+                    "created_at": string,"created_by": string,"description": string | null,"done_at": string | null,"emoji": string,"id": string,"target_date": string | null,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"description"?: string | null,"done_at"?: string | null,"emoji"?: string,"id"?: string,"target_date"?: string | null,"title": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"description"?: string | null,"done_at"?: string | null,"emoji"?: string,"id"?: string,"target_date"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "goals_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -797,6 +963,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"moodboard_items": {
+                  Row: {
+                    "board": string,"body": string | null,"color": string | null,"created_at": string,"created_by": string,"credit": Json | null,"id": string,"kind": string,"path": string | null,"url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "board"?: string,"body"?: string | null,"color"?: string | null,"created_at"?: string,"created_by"?: string,"credit"?: Json | null,"id"?: string,"kind": string,"path"?: string | null,"url"?: string | null
+                  }
+                  Update: {
+                    "board"?: string,"body"?: string | null,"color"?: string | null,"created_at"?: string,"created_by"?: string,"credit"?: Json | null,"id"?: string,"kind"?: string,"path"?: string | null,"url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "moodboard_items_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"notification_prefs": {
                   Row: {
                     "categories": NonNullable<Json>,"previews": boolean,"updated_at": string,"user_id": string
@@ -1055,6 +1241,32 @@ isOneToOne: true
                   Relationships: [
                     
                   ]
+                },"places": {
+                  Row: {
+                    "country": string | null,"created_at": string,"created_by": string,"id": string,"kind": string,"lat": number,"lon": number,"memory_id": string | null,"name": string,"note": string | null,"visited_on": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "country"?: string | null,"created_at"?: string,"created_by"?: string,"id"?: string,"kind"?: string,"lat": number,"lon": number,"memory_id"?: string | null,"name": string,"note"?: string | null,"visited_on"?: string | null
+                  }
+                  Update: {
+                    "country"?: string | null,"created_at"?: string,"created_by"?: string,"id"?: string,"kind"?: string,"lat"?: number,"lon"?: number,"memory_id"?: string | null,"name"?: string,"note"?: string | null,"visited_on"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "places_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "places_memory_id_fkey"
+      columns: ["memory_id"]
+isOneToOne: false
+      referencedRelation: "memories"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"pops": {
                   Row: {
                     "body": string | null,"created_at": string,"id": string,"kind": string,"media_path": string | null,"recipient_id": string,"scream": boolean,"sender_id": string,"shown_at": string | null,"teaser": string | null
@@ -1189,6 +1401,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"shared_notes": {
+                  Row: {
+                    "body": string,"color": string,"created_at": string,"created_by": string,"id": string,"pinned": boolean,"title": string,"updated_at": string,"updated_by": string | null,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body"?: string,"color"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"pinned"?: boolean,"title"?: string,"updated_at"?: string,"updated_by"?: string | null,"version"?: number
+                  }
+                  Update: {
+                    "body"?: string,"color"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"pinned"?: boolean,"title"?: string,"updated_at"?: string,"updated_by"?: string | null,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "shared_notes_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shared_notes_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"songs": {
                   Row: {
                     "added_by": string,"artist": string,"created_at": string,"dedication": string | null,"id": string,"title": string,"url": string | null
@@ -1255,6 +1493,46 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"time_capsule_contents": {
+                  Row: {
+                    "body": string,"capsule_id": string,"media_paths": (string)[]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"capsule_id": string,"media_paths"?: (string)[]
+                  }
+                  Update: {
+                    "body"?: string,"capsule_id"?: string,"media_paths"?: (string)[]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "time_capsule_contents_capsule_id_fkey"
+      columns: ["capsule_id"]
+isOneToOne: true
+      referencedRelation: "time_capsules"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"time_capsules": {
+                  Row: {
+                    "author_id": string,"created_at": string,"id": string,"open_at": string,"opened_at": string | null,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string,"created_at"?: string,"id"?: string,"open_at": string,"opened_at"?: string | null,"title": string
+                  }
+                  Update: {
+                    "author_id"?: string,"created_at"?: string,"id"?: string,"open_at"?: string,"opened_at"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "time_capsules_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"uploads": {
                   Row: {
                     "area": string,"bucket": string,"created_at": string,"id": string,"mime_type": string,"owner_id": string,"path": string,"size_bytes": number
@@ -1270,6 +1548,78 @@ isOneToOne: false
                     {
       foreignKeyName: "uploads_owner_id_fkey"
       columns: ["owner_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"voice_notes": {
+                  Row: {
+                    "author_id": string,"created_at": string,"duration_ms": number,"id": string,"listened_at": string | null,"path": string,"recipient_id": string | null,"title": string | null,"waveform": (number)[]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string,"created_at"?: string,"duration_ms": number,"id"?: string,"listened_at"?: string | null,"path": string,"recipient_id"?: string | null,"title"?: string | null,"waveform"?: (number)[]
+                  }
+                  Update: {
+                    "author_id"?: string,"created_at"?: string,"duration_ms"?: number,"id"?: string,"listened_at"?: string | null,"path"?: string,"recipient_id"?: string | null,"title"?: string | null,"waveform"?: (number)[]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "voice_notes_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "voice_notes_recipient_id_fkey"
+      columns: ["recipient_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"watch_items": {
+                  Row: {
+                    "created_at": string,"created_by": string,"id": string,"kind": string,"overview": string | null,"poster_url": string | null,"status": string,"title": string,"tmdb_id": string | null,"watched_at": string | null,"year": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"id"?: string,"kind"?: string,"overview"?: string | null,"poster_url"?: string | null,"status"?: string,"title": string,"tmdb_id"?: string | null,"watched_at"?: string | null,"year"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"id"?: string,"kind"?: string,"overview"?: string | null,"poster_url"?: string | null,"status"?: string,"title"?: string,"tmdb_id"?: string | null,"watched_at"?: string | null,"year"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "watch_items_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"watch_ratings": {
+                  Row: {
+                    "item_id": string,"stars": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "item_id": string,"stars": number,"user_id"?: string
+                  }
+                  Update: {
+                    "item_id"?: string,"stars"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "watch_ratings_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "watch_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "watch_ratings_user_id_fkey"
+      columns: ["user_id"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
@@ -1295,6 +1645,52 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"wishlist_claims": {
+                  Row: {
+                    "claimed_at": string,"claimed_by": string,"item_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "claimed_at"?: string,"claimed_by"?: string,"item_id": string
+                  }
+                  Update: {
+                    "claimed_at"?: string,"claimed_by"?: string,"item_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wishlist_claims_claimed_by_fkey"
+      columns: ["claimed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wishlist_claims_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: true
+      referencedRelation: "wishlist_items"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"wishlist_items": {
+                  Row: {
+                    "created_at": string,"id": string,"link": string | null,"note": string | null,"owner_id": string,"price": string | null,"priority": number,"received_at": string | null,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"link"?: string | null,"note"?: string | null,"owner_id"?: string,"price"?: string | null,"priority"?: number,"received_at"?: string | null,"title": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"link"?: string | null,"note"?: string | null,"owner_id"?: string,"price"?: string | null,"priority"?: number,"received_at"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wishlist_items_owner_id_fkey"
+      columns: ["owner_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -1307,6 +1703,27 @@ isOneToOne: true
 "call_set_status":
 { Args: { "call_id": string,"next_status": string,"reason"?: string }; Returns: string
                            },
+"capsule_create":
+{ Args: { "p_body": string,"p_media"?: (string)[],"p_open_at": string,"p_title": string }; Returns: string
+                           },
+"capsule_mark_opened":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
+"challenge_complete":
+{ Args: { "p_note"?: string }; Returns: undefined
+                           },
+"challenge_today":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "body": string,
+"category": string,
+"id": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "challenges"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "chess_any_legal":
 { Args: { "b": string,"castling": string,"ep": number,"white": boolean }; Returns: boolean
                            },
@@ -1327,6 +1744,14 @@ isOneToOne: true
                            },
 "chess_targets":
 { Args: { "b": string,"castling": string,"ep": number,"fsq": number }; Returns: (number)[]
+                           },
+"couple_daily":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"daily_photo_status":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "posted": boolean,"user_id": string
+            }[]
                            },
 "device_end":
 { Args: { "device_id": string }; Returns: undefined
@@ -1759,6 +2184,12 @@ isOneToOne: true
 "mark_surprise_opened":
 { Args: { "surprise_id": string }; Returns: undefined
                            },
+"member_crud":
+{ Args: { "owner_col"?: string,"t": string }; Returns: undefined
+                           },
+"note_save":
+{ Args: { "p_body": string,"p_id": string,"p_title": string,"p_version": number }; Returns: Json
+                           },
 "partner_id":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
@@ -1830,6 +2261,9 @@ isOneToOne: true
 "pet_unlock":
 { Args: { "k": string,"pid": string,"uid": string }; Returns: undefined
                            },
+"posted_photo_on":
+{ Args: { "d": string }; Returns: boolean
+                           },
 "push_dispatch":
 { Args: { "actor": string,"event_type": string,"record_id": string }; Returns: undefined
                            },
@@ -1866,6 +2300,9 @@ isOneToOne: true
 { Args: Record<PropertyKey, never>; Returns: {
               "conversation_id": string,"unread": number
             }[]
+                           },
+"voice_listened":
+{ Args: { "p_id": string }; Returns: undefined
                            }
           }
           Enums: {

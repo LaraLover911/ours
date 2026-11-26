@@ -547,5 +547,104 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   await A.c.from("weather_places").delete().eq("user_id", A.id);
 }
 
+// ---------------------------------------------------------------------------
+// Couple features
+{
+  const psql = (q) => execSync(`docker exec supabase_db_ours psql -U postgres -tAqc "${q}"`).toString().trim();
+  // Wishlist: the owner never learns who reserved what
+  const { data: wish } = await A.c.from("wishlist_items").insert({ title: "Kamera" }).select().single();
+  const self = await A.c.from("wishlist_claims").insert({ item_id: wish.id });
+  check("wishlist: cannot reserve my own wish", !!self.error);
+  const claim = await L.c.from("wishlist_claims").insert({ item_id: wish.id });
+  check("wishlist: partner can reserve it", !claim.error, claim.error?.message);
+  const peek = await A.c.from("wishlist_claims").select("*").eq("item_id", wish.id);
+  check("wishlist: owner cannot see the reservation", (peek.data ?? []).length === 0);
+  const edit = await L.c.from("wishlist_items").update({ title: "hacked" }).eq("id", wish.id).select();
+  check("wishlist: partner cannot edit my wish", (edit.data ?? []).length === 0);
+
+  // Time capsule: sealed until it opens
+  const soon = new Date(Date.now() + 2 * 3600e3).toISOString();
+  const cap = await A.c.rpc("capsule_create", { p_title: "Für uns in einem Jahr", p_open_at: soon, p_body: "geheim", p_media: [] });
+  check("capsule: created", !cap.error, cap.error?.message);
+  const early = await L.c.from("time_capsule_contents").select("body").eq("capsule_id", cap.data);
+  const earlyA = await A.c.from("time_capsule_contents").select("body").eq("capsule_id", cap.data);
+  check("capsule: content sealed for both before open_at", (early.data ?? []).length === 0 && (earlyA.data ?? []).length === 0);
+  const tooSoon = await A.c.rpc("capsule_create", { p_title: "x", p_open_at: new Date(Date.now() + 60e3).toISOString(), p_body: "y" });
+  check("capsule: must open at least an hour later", !!tooSoon.error);
+  const foreignMedia = await A.c.rpc("capsule_create", { p_title: "x", p_open_at: soon, p_body: "y", p_media: [`${L.id}/capsule/a.jpg`] });
+  check("capsule: only own uploads inside", !!foreignMedia.error);
+  psql(`update public.time_capsules set created_at = now() - interval '3 hours', open_at = now() - interval '1 minute' where id = '${cap.data}'`);
+  const opened = await L.c.from("time_capsule_contents").select("body").eq("capsule_id", cap.data).single();
+  check("capsule: readable once open", opened.data?.body === "geheim");
+  const direct = await A.c.from("time_capsules").insert({ title: "x", open_at: soon });
+  check("capsule: no direct inserts (content must go with it)", !!direct.error);
+
+  // Photo of the day: partner's photo hidden until you post yours
+  psql("delete from public.daily_photos");
+  const pa = await A.c.from("daily_photos").insert({ path: `${A.id}/photo/a.webp`, caption: "Kaffee" });
+  check("photo: posting my photo works", !pa.error, pa.error?.message);
+  const hidden = await L.c.from("daily_photos").select("*");
+  check("photo: partner's photo hidden before posting", (hidden.data ?? []).length === 0);
+  const st = await L.c.rpc("daily_photo_status");
+  check("photo: but you can see that it was posted", st.data?.find((r) => r.user_id === A.id)?.posted === true);
+  const wrongPath = await L.c.from("daily_photos").insert({ path: `${A.id}/photo/l.webp` });
+  check("photo: path must be in your own folder", !!wrongPath.error);
+  await L.c.from("daily_photos").insert({ path: `${L.id}/photo/l.webp` });
+  const both = await L.c.from("daily_photos").select("*");
+  check("photo: revealed after posting", (both.data ?? []).length === 2);
+  const twice = await A.c.from("daily_photos").insert({ path: `${A.id}/photo/b.webp` });
+  check("photo: one per day", !!twice.error);
+
+  // Voice notes
+  const memo = await A.c.from("voice_notes").insert({ recipient_id: null, path: `${A.id}/private/voice/m.webm`, duration_ms: 3000 }).select().single();
+  check("voice: private memo saved", !memo.error, memo.error?.message);
+  const leaky = await A.c.from("voice_notes").insert({ recipient_id: null, path: `${A.id}/voice/m.webm`, duration_ms: 3000 });
+  check("voice: private memo must live in the private folder", !!leaky.error);
+  const toL = await A.c.from("voice_notes").insert({ recipient_id: L.id, path: `${A.id}/voice/n.webm`, duration_ms: 4000 }).select().single();
+  const lSees = await L.c.from("voice_notes").select("id");
+  check("voice: partner sees notes to them, not my memos", (lSees.data ?? []).length === 1 && lSees.data[0].id === toL.data.id);
+  await L.c.rpc("voice_listened", { p_id: toL.data.id });
+  const heard = await A.c.from("voice_notes").select("listened_at").eq("id", toL.data.id).single();
+  check("voice: listened is shown to the sender", !!heard.data?.listened_at);
+
+  // Shared notes: conflicting saves are detected
+  const { data: note } = await A.c.from("shared_notes").insert({ title: "Einkauf", body: "Milch" }).select().single();
+  const s1 = await A.c.rpc("note_save", { p_id: note.id, p_title: "Einkauf", p_body: "Milch, Brot", p_version: note.version });
+  const s2 = await L.c.rpc("note_save", { p_id: note.id, p_title: "Einkauf", p_body: "Milch, Eier", p_version: note.version });
+  check("notes: first save wins, second sees a conflict", s1.data?.conflict === false && s2.data?.conflict === true && s2.data.note.body === "Milch, Brot");
+  const sneak = await L.c.from("shared_notes").update({ body: "x" }).eq("id", note.id).select();
+  check("notes: body only changes through the versioned save", !!sneak.error || (sneak.data ?? []).length === 0);
+
+  // Daily challenge: the same for both, done once per day
+  const ca = await A.c.rpc("challenge_today");
+  const cl = await L.c.rpc("challenge_today");
+  check("challenge: same challenge for both", ca.data?.id && ca.data.id === cl.data?.id);
+  await A.c.rpc("challenge_complete", { p_note: "erledigt" });
+  await A.c.rpc("challenge_complete", { p_note: "nochmal" });
+  const done = await L.c.from("challenge_done").select("*").eq("user_id", A.id);
+  check("challenge: once per day (note updated)", done.data?.length === 1 && done.data[0].note === "nochmal");
+
+  // Anniversary + countdown reminders
+  const oldStart = psql("select coalesce(start_date::text, '') from public.couple_settings limit 1");
+  psql("delete from public.couple_reminders; update public.couple_settings set start_date = (public.berlin_today() - interval '2 years')::date");
+  await A.c.from("countdowns").insert({ title: "Urlaub", target_at: new Date().toISOString(), emoji: "✈️" });
+  const made = psql("select public.couple_daily()");
+  psql("select public.couple_daily()");
+  const rem = await L.c.from("couple_reminders").select("kind, title");
+  check("reminders: anniversary + countdown, once per day", rem.data?.length === Number(made) && rem.data.some((r) => r.kind === "anniversary" && r.title.startsWith("2 Jahre")) && rem.data.some((r) => r.kind === "countdown"), JSON.stringify(rem.data));
+  const fakeRem = await A.c.from("couple_reminders").insert({ day: "2030-01-01", kind: "countdown", ref: "x", title: "x" });
+  check("reminders: cannot be written by the app", !!fakeRem.error);
+
+  // Watchlist and map basics
+  const w = await A.c.from("watch_items").insert({ title: "Amélie", kind: "movie", tmdb_id: "movie:194", poster_url: "https://evil.example/p.jpg" });
+  check("watchlist: posters only from TMDB's image host", !!w.error);
+  const place = await A.c.from("places").insert({ name: "Paris", lat: 48.85, lon: 2.35, kind: "dream" });
+  check("map: places can be added", !place.error, place.error?.message);
+  const badPlace = await A.c.from("places").insert({ name: "Nowhere", lat: 120, lon: 0 });
+  check("map: coordinates validated", !!badPlace.error);
+  psql(`update public.couple_settings set start_date = ${oldStart ? `'${oldStart}'` : "null"}`);
+  psql("delete from public.places; delete from public.watch_items; delete from public.shared_notes; delete from public.voice_notes; delete from public.daily_photos; delete from public.wishlist_items; delete from public.time_capsules; delete from public.countdowns; delete from public.couple_reminders; delete from public.challenge_done");
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);

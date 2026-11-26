@@ -20,6 +20,8 @@ function pickMime() {
 
 export type VoiceResult = { blob: Blob; duration: number; waveform: number[] };
 
+const noopSubscribe = () => () => {};
+
 /** Records a voice message with a live level meter and waveform. */
 export function useVoiceRecorder() {
   const [state, setState] = React.useState<"idle" | "recording">("idle");
@@ -38,7 +40,12 @@ export function useVoiceRecorder() {
     cancelled?: boolean;
   } | null>(null);
 
-  const supported = typeof window !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
+  // Same value on the server and during hydration, the real one after.
+  const supported = React.useSyncExternalStore(
+    noopSubscribe,
+    () => !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined",
+    () => true,
+  );
 
   const cleanup = () => {
     const r = rec.current;

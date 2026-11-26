@@ -11,7 +11,8 @@ export async function GET(req: NextRequest) {
   if ("error" in auth) return auth.error;
   if (rateLimited(`gcal:${auth.uid}`, 20)) return NextResponse.json({ error: "Zu viele Anfragen, kurz warten" }, { status: 429 });
   const token = await googleAccessToken(auth.supabase);
-  if (!token) return NextResponse.json({ error: "Google Kalender ist nicht verbunden" }, { status: 404 });
+  // Not connected is a normal state, not an error.
+  if (!token) return NextResponse.json({ connected: false, items: [] });
   const days = Math.min(60, Math.max(1, Number(req.nextUrl.searchParams.get("days")) || 14));
   const now = new Date();
   const url = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest) {
   try {
     const r = await getJson<{ items?: GEvent[] }>(url.toString(), { headers: { Authorization: `Bearer ${token}` } }, "Google Kalender");
     return NextResponse.json({
+      connected: true,
       items: (r.items ?? [])
         .filter((e) => e.status !== "cancelled")
         .map((e) => ({

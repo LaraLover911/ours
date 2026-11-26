@@ -264,7 +264,8 @@ function GoogleEvents() {
     setState({ loading: true, error: null, items: null });
     const r = await fetch("/api/google/events?days=14", { cache: "no-store" }).catch(() => null);
     const j = r ? await r.json().catch(() => ({})) : {};
-    setState({ loading: false, error: r?.ok ? null : (j.error ?? "Nicht erreichbar"), items: r?.ok ? j.items : null });
+    const ok = r?.ok && j.connected !== false;
+    setState({ loading: false, error: ok ? null : (j.connected === false ? "Google Kalender ist nicht verbunden" : (j.error ?? "Nicht erreichbar")), items: ok ? j.items : null });
   };
   return (
     <div className="mt-4 border-t border-border pt-3">

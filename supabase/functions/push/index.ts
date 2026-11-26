@@ -218,6 +218,54 @@ async function handleEvent(cfg: Config, type: string, id: string) {
         urgency: "high",
       }));
     }
+    case "calendar": {
+      const { data: e } = await admin.from("calendar_events").select("id, created_by, title, starts_at").eq("id", id).single();
+      if (!e) return [];
+      const when = new Date(e.starts_at).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+      return notifyPartnerOf(cfg, e.created_by, `calendar:${id}`, (name, previews) => ({
+        title: "🗓️ Neuer Termin",
+        body: previews ? `${name}: ${short(e.title)} · ${when}` : `${name} hat einen Termin eingetragen.`,
+        url: "/calendar",
+        tag: `calendar-${id}`,
+        category: "events",
+      }));
+    }
+    case "voice": {
+      const { data: v } = await admin.from("voice_notes").select("id, author_id, recipient_id").eq("id", id).single();
+      if (!v?.recipient_id) return [];
+      return notifyPartnerOf(cfg, v.author_id, `voice:${id}`, (name) => ({ title: `🎙️ ${name}`, body: "Eine Sprachnotiz für dich", url: "/voice", tag: `voice-${id}`, category: "chat" }));
+    }
+    case "photo": {
+      const { data: ph } = await admin.from("daily_photos").select("id, user_id, day").eq("id", id).single();
+      if (!ph) return [];
+      return notifyPartnerOf(cfg, ph.user_id, `photo:${id}`, (name) => ({
+        title: "📷 Foto des Tages",
+        body: `${name} hat das Foto von heute gepostet. Zeig deins, um es zu sehen.`,
+        url: "/photo",
+        tag: `photo-${ph.day}`,
+        category: "memory",
+      }));
+    }
+    case "capsule": {
+      const { data: c } = await admin.from("time_capsules").select("id, author_id, open_at").eq("id", id).single();
+      if (!c) return [];
+      const date = new Date(c.open_at).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" });
+      return notifyPartnerOf(cfg, c.author_id, `capsule:${id}`, (name) => ({ title: "⏳ Eine Zeitkapsel", body: `${name} hat eine Zeitkapsel vergraben. Sie öffnet sich am ${date}.`, url: "/capsule", tag: `capsule-${id}`, category: "letter" }));
+    }
+    case "reminder": {
+      // Daily reminders (anniversaries, countdowns, capsules) go to both of you.
+      const { data: r } = await admin.from("couple_reminders").select("*").eq("id", Number(id)).single();
+      if (!r) return [];
+      const url = r.kind === "capsule" ? "/capsule" : "/calendar";
+      const out: unknown[] = [];
+      for (const p of await members()) {
+        const prefs = await prefsFor(p.id);
+        if (prefs.categories.events === false) continue;
+        if (!(await firstTime(`reminder:${id}:${p.id}`))) continue;
+        out.push(await deliver(cfg, p.id, { title: r.title, body: r.kind === "countdown" ? "Der Countdown ist abgelaufen ♡" : "ours. ♡", url, tag: `reminder-${id}`, category: "events" }));
+      }
+      return out;
+    }
     case "daily_question": {
       const day = id;
       const people = await members();
