@@ -115,6 +115,8 @@ Sonst funktionieren die Links in Bestätigungs- und Passwort-Mails nicht.
 
 **Niemals** den `service_role`- oder `secret`-Key verwenden. Die App braucht ihn nicht, und er gehört weder ins Frontend noch zu GitHub. `.env.local` steht in `.gitignore`.
 
+Optionale Dienste (Spotify, Google Kalender, Discord, YouTube, GIPHY, Tenor, Unsplash, TMDB, TURN für Anrufe) richtest du mit **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)** ein.
+
 ### 5. Lokal starten
 
 ```bash
