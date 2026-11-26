@@ -475,5 +475,62 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("listen: spotify connections only via server", !!sp.error);
 }
 
+// Mochi: server-side needs, economy and quests
+{
+  const st = await A.c.rpc("pet_state");
+  check("pet: state is created once and readable", !st.error && st.data?.pet?.name === "Mochi", st.error?.message);
+  const both = await Promise.all([A.c.rpc("pet_state"), L.c.rpc("pet_state")]);
+  const { data: pets } = await A.c.from("pets").select("id");
+  check("pet: exactly one shared pet", pets?.length === 1 && both.every((b) => !b.error));
+  const forge = await A.c.from("pets").update({ coins: 99999 }).eq("id", pets[0].id).select();
+  check("pet: coins cannot be written directly", (forge.data ?? []).length === 0);
+  const before = st.data.pet.coins;
+  const fed = await A.c.rpc("pet_act", { p_action: "feed", p_item: "apple" });
+  check("pet: feeding uses an apple and pays a little", !fed.error && fed.data.pet.coins === before + 2, fed.error?.message);
+  const fake = await A.c.rpc("pet_act", { p_action: "feed", p_item: "ball" });
+  check("pet: a toy is not food", !!fake.error);
+  const noToy = await A.c.rpc("pet_act", { p_action: "play", p_item: "feather" });
+  check("pet: cannot play with a toy you don't own", !!noToy.error);
+  const rich = await A.c.rpc("pet_buy", { p_item: "room_garden" });
+  check("pet: stage-locked items cannot be bought early", !!rich.error);
+  const poor = await A.c.rpc("pet_buy", { p_item: "bed", p_qty: 10 });
+  check("pet: cannot buy without enough coins", !!poor.error && /Münzen/.test(poor.error.message));
+  const buy = await A.c.rpc("pet_buy", { p_item: "plant" });
+  check("pet: buying deducts coins", !buy.error && buy.data.pet.coins === fed.data.pet.coins - 30, buy.error?.message);
+  const place = await L.c.rpc("pet_furnish", { p_action: "place", p_item: "plant", p_room: "living", p_x: 0.3, p_z: -0.2, p_rot: 90 });
+  check("pet: partner can place the plant", !place.error, place.error?.message);
+  const again = await L.c.rpc("pet_furnish", { p_action: "place", p_item: "plant", p_room: "living", p_x: 0, p_z: 0, p_rot: 0 });
+  check("pet: cannot place more than you own", !!again.error);
+  const locked = await A.c.rpc("pet_furnish", { p_action: "place", p_item: "plant", p_room: "bedroom", p_x: 0, p_z: 0, p_rot: 0 });
+  check("pet: locked room rejected", !!locked.error);
+  const out = await L.c.rpc("pet_furnish", { p_action: "move", p_id: place.data?.id, p_x: 5, p_z: 0, p_rot: 0 });
+  check("pet: furniture stays inside the room", !!out.error);
+  // Quests: feed twice -> claim once (make Mochi hungry again first)
+  execSync(`docker exec supabase_db_ours psql -U postgres -qc "update public.pet_stats set hunger = 40"`);
+  const fed2 = await A.c.rpc("pet_act", { p_action: "feed", p_item: "apple" });
+  check("pet: full Mochi refuses food, hungry Mochi eats", !fed2.error, fed2.error?.message);
+  const c1 = await A.c.rpc("pet_claim", { p_quest: "feed" });
+  const c2 = await A.c.rpc("pet_claim", { p_quest: "feed" });
+  check("pet: daily quest pays once", !c1.error && !!c2.error, c1.error?.message);
+  const c3 = await A.c.rpc("pet_claim", { p_quest: "play" });
+  check("pet: unfinished quest cannot be claimed", !!c3.error);
+  // Mini game: at most 3 paid rounds a day, max 20 coins
+  const r1 = await A.c.rpc("pet_minigame", { p_score: 200 });
+  await A.c.rpc("pet_minigame", { p_score: 60 });
+  await A.c.rpc("pet_minigame", { p_score: 60 });
+  const r4 = await A.c.rpc("pet_minigame", { p_score: 60 });
+  check("pet: mini game reward is capped", r1.data?.reward === 20 && r4.data?.reward === 0, `${r1.data?.reward}/${r4.data?.reward}`);
+  const cheat = await A.c.rpc("pet_minigame", { p_score: 100000 });
+  check("pet: impossible score rejected", !!cheat.error);
+  // Decay over 4 days never goes below the floor, mood is gentle
+  execSync(`docker exec supabase_db_ours psql -U postgres -qc "update public.pet_stats set measured_at = now() - interval '96 hours'; update public.pets set last_cared_at = now() - interval '96 hours', sleeping = false"`);
+  const later = await L.c.rpc("pet_state");
+  const v = later.data.stats;
+  check("pet: needs decay but never below the floor", v.hunger >= 12 && v.joy >= 12 && v.clean >= 15 && v.energy >= 15 && v.hunger < 50, JSON.stringify(v));
+  check("pet: after a long absence Mochi missed you (no sickness, no death)", later.data.mood === "missed_you");
+  const back = await L.c.rpc("pet_act", { p_action: "pet" });
+  check("pet: reunion cheers Mochi up", !back.error && back.data.stats.joy > v.joy + 20 && back.data.mood !== "missed_you", back.error?.message);
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);

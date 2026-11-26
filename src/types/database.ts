@@ -817,6 +817,244 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"pet_achievements": {
+                  Row: {
+                    "key": string,"pet_id": string,"unlocked_at": string,"unlocked_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "key": string,"pet_id": string,"unlocked_at"?: string,"unlocked_by"?: string | null
+                  }
+                  Update: {
+                    "key"?: string,"pet_id"?: string,"unlocked_at"?: string,"unlocked_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_achievements_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pet_achievements_unlocked_by_fkey"
+      columns: ["unlocked_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_bond": {
+                  Row: {
+                    "pet_id": string,"points": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "pet_id": string,"points"?: number
+                  }
+                  Update: {
+                    "pet_id"?: string,"points"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_bond_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: true
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_events": {
+                  Row: {
+                    "actor": string | null,"created_at": string,"data": NonNullable<Json>,"id": number,"kind": string,"pet_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor"?: string | null,"created_at"?: string,"data"?: NonNullable<Json>,"id"?: never,"kind": string,"pet_id": string
+                  }
+                  Update: {
+                    "actor"?: string | null,"created_at"?: string,"data"?: NonNullable<Json>,"id"?: never,"kind"?: string,"pet_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_events_actor_fkey"
+      columns: ["actor"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pet_events_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_evolution": {
+                  Row: {
+                    "pet_id": string,"reached_at": string,"stage": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "pet_id": string,"reached_at"?: string,"stage": number
+                  }
+                  Update: {
+                    "pet_id"?: string,"reached_at"?: string,"stage"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_evolution_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_furniture": {
+                  Row: {
+                    "id": string,"item_id": string,"pet_id": string,"placed_at": string,"placed_by": string | null,"room": string,"rot": number,"x": number,"z": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: string,"item_id": string,"pet_id": string,"placed_at"?: string,"placed_by"?: string | null,"room": string,"rot"?: number,"x": number,"z": number
+                  }
+                  Update: {
+                    "id"?: string,"item_id"?: string,"pet_id"?: string,"placed_at"?: string,"placed_by"?: string | null,"room"?: string,"rot"?: number,"x"?: number,"z"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_furniture_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "pet_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pet_furniture_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pet_furniture_placed_by_fkey"
+      columns: ["placed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_house": {
+                  Row: {
+                    "floor": string,"pet_id": string,"room": string,"unlocked": boolean,"wall": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "floor"?: string,"pet_id": string,"room": string,"unlocked"?: boolean,"wall"?: string
+                  }
+                  Update: {
+                    "floor"?: string,"pet_id"?: string,"room"?: string,"unlocked"?: boolean,"wall"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_house_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_inventory": {
+                  Row: {
+                    "item_id": string,"pet_id": string,"qty": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "item_id": string,"pet_id": string,"qty"?: number
+                  }
+                  Update: {
+                    "item_id"?: string,"pet_id"?: string,"qty"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_inventory_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "pet_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pet_inventory_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_items": {
+                  Row: {
+                    "effect": NonNullable<Json>,"emoji": string,"id": string,"kind": string,"min_stage": number,"name": string,"price": number,"sort": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "effect"?: NonNullable<Json>,"emoji": string,"id": string,"kind": string,"min_stage"?: number,"name": string,"price": number,"sort"?: number
+                  }
+                  Update: {
+                    "effect"?: NonNullable<Json>,"emoji"?: string,"id"?: string,"kind"?: string,"min_stage"?: number,"name"?: string,"price"?: number,"sort"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"pet_quests": {
+                  Row: {
+                    "claimed_at": string | null,"day": string,"goal": number,"progress": number,"quest": string,"reward": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "claimed_at"?: string | null,"day": string,"goal": number,"progress"?: number,"quest": string,"reward": number,"user_id": string
+                  }
+                  Update: {
+                    "claimed_at"?: string | null,"day"?: string,"goal"?: number,"progress"?: number,"quest"?: string,"reward"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_quests_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pet_stats": {
+                  Row: {
+                    "clean": number,"energy": number,"hunger": number,"joy": number,"measured_at": string,"pet_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "clean"?: number,"energy"?: number,"hunger"?: number,"joy"?: number,"measured_at"?: string,"pet_id": string
+                  }
+                  Update: {
+                    "clean"?: number,"energy"?: number,"hunger"?: number,"joy"?: number,"measured_at"?: string,"pet_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pet_stats_pet_id_fkey"
+      columns: ["pet_id"]
+isOneToOne: true
+      referencedRelation: "pets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pets": {
+                  Row: {
+                    "coins": number,"created_at": string,"id": string,"last_cared_at": string,"name": string,"singleton": boolean,"sleeping": boolean,"stage": number,"updated_at": string,"version": number,"xp": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "coins"?: number,"created_at"?: string,"id"?: string,"last_cared_at"?: string,"name"?: string,"singleton"?: boolean,"sleeping"?: boolean,"stage"?: number,"updated_at"?: string,"version"?: number,"xp"?: number
+                  }
+                  Update: {
+                    "coins"?: number,"created_at"?: string,"id"?: string,"last_cared_at"?: string,"name"?: string,"singleton"?: boolean,"sleeping"?: boolean,"stage"?: number,"updated_at"?: string,"version"?: number,"xp"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"pops": {
                   Row: {
                     "body": string | null,"created_at": string,"id": string,"kind": string,"media_path": string | null,"recipient_id": string,"scream": boolean,"sender_id": string,"shown_at": string | null,"teaser": string | null
@@ -1503,6 +1741,74 @@ isOneToOne: false
                            },
 "partner_id":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"pet_act":
+{ Args: { "p_action": string,"p_item"?: string }; Returns: Json
+                           },
+"pet_buy":
+{ Args: { "p_item": string,"p_qty"?: number }; Returns: Json
+                           },
+"pet_claim":
+{ Args: { "p_quest": string }; Returns: Json
+                           },
+"pet_decayed":
+{ Args: { "at": string,"s": Omit<Database["public"]['Tables']["pet_stats"]['Row'], Database["public"]['Tables']["pet_stats"]['ComputedFields']>,"sleeping": boolean }; Returns: {
+              "clean": number,
+"energy": number,
+"hunger": number,
+"joy": number,
+"measured_at": string,
+"pet_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "pet_stats"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"pet_furnish":
+{ Args: { "p_action": string,"p_id"?: string,"p_item"?: string,"p_room"?: string,"p_rot"?: number,"p_x"?: number,"p_z"?: number }; Returns: Json
+                           },
+"pet_minigame":
+{ Args: { "p_score": number }; Returns: Json
+                           },
+"pet_mood":
+{ Args: { "away_hours": number,"s": Omit<Database["public"]['Tables']["pet_stats"]['Row'], Database["public"]['Tables']["pet_stats"]['ComputedFields']>,"sleeping": boolean }; Returns: string
+                           },
+"pet_quest_step":
+{ Args: { "n"?: number,"q": string,"uid": string }; Returns: undefined
+                           },
+"pet_quests_ensure":
+{ Args: { "uid": string }; Returns: undefined
+                           },
+"pet_rename":
+{ Args: { "p_name": string }; Returns: undefined
+                           },
+"pet_state":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"pet_the":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "coins": number,
+"created_at": string,
+"id": string,
+"last_cared_at": string,
+"name": string,
+"singleton": boolean,
+"sleeping": boolean,
+"stage": number,
+"updated_at": string,
+"version": number,
+"xp": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "pets"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"pet_unlock":
+{ Args: { "k": string,"pid": string,"uid": string }; Returns: undefined
                            },
 "push_dispatch":
 { Args: { "actor": string,"event_type": string,"record_id": string }; Returns: undefined
