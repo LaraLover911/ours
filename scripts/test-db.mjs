@@ -432,5 +432,48 @@ const { data: conv } = await A.c.from("conversations").select("id").eq("is_defau
   check("games: scoreboard counts", (board ?? []).some((b) => b.game === "chess" && b.played >= 1));
 }
 
+// Listen Together: one clock, a state machine, validated items
+{
+  const { data: room, error: ce } = await A.c.rpc("listen_create", { p_name: "Abendmusik" });
+  check("listen: create room", !ce && !!room, ce?.message);
+  const add = (who, ref, provider = "youtube", extra = {}) =>
+    who.c.rpc("listen_add", { p_room: room, p_provider: provider, p_ref: ref, p_title: "Song " + ref, p_artist: null, p_thumb: null, p_duration_ms: 200000, p_dedication: null, ...extra });
+  const bad = await add(A, "../../etc/passwd");
+  check("listen: invalid YouTube id rejected", !!bad.error);
+  const badSp = await add(A, "spotify:track:short", "spotify");
+  check("listen: invalid Spotify uri rejected", !!badSp.error);
+  const badThumb = await add(A, "dQw4w9WgXcQ", "youtube", { p_thumb: "javascript:alert(1)" });
+  const { data: q0 } = await A.c.from("listening_queue").select("thumb").eq("id", badThumb.data).single();
+  check("listen: non-https thumbnails dropped", !badThumb.error && q0?.thumb === null);
+  const s2 = await add(L, "aaaaaaaaaaa", "youtube", { p_dedication: "für dich ♡" });
+  const s3 = await add(A, "spotify:track:4cOdK2wGLETKBW3PvgPWqT", "spotify");
+  let { data: r } = await A.c.from("listening_rooms").select("*").eq("id", room).single();
+  check("listen: first song becomes current, paused", r.current_item === badThumb.data && r.status === "paused");
+  const direct = await A.c.from("listening_rooms").update({ status: "playing" }).eq("id", room).select();
+  check("listen: room cannot be written directly", (direct.data ?? []).length === 0);
+  await L.c.rpc("listen_control", { p_room: room, p_action: "play" });
+  await new Promise((res) => setTimeout(res, 1200));
+  await A.c.rpc("listen_control", { p_room: room, p_action: "pause" });
+  ({ data: r } = await A.c.from("listening_rooms").select("*").eq("id", room).single());
+  check("listen: pause stores the server-side position", r.status === "paused" && r.base_pos_ms >= 1000 && r.base_pos_ms < 3000, String(r.base_pos_ms));
+  await A.c.rpc("listen_control", { p_room: room, p_action: "play" });
+  const n1 = await A.c.rpc("listen_control", { p_room: room, p_action: "next", p_expect: badThumb.data });
+  const n2 = await L.c.rpc("listen_control", { p_room: room, p_action: "next", p_expect: badThumb.data });
+  ({ data: r } = await A.c.from("listening_rooms").select("*").eq("id", room).single());
+  check("listen: double skip from both devices only skips once", !n1.error && n2.data?.ignored === true && r.current_item === s2.data && r.status === "playing");
+  const rm = await A.c.rpc("listen_remove", { p_item: s2.data });
+  check("listen: current song cannot be removed", !!rm.error);
+  await A.c.rpc("listen_control", { p_room: room, p_action: "ended", p_expect: s2.data });
+  await A.c.rpc("listen_control", { p_room: room, p_action: "ended", p_expect: s3.data });
+  ({ data: r } = await A.c.from("listening_rooms").select("*").eq("id", room).single());
+  check("listen: empty queue ends idle", r.status === "idle" && r.current_item === null);
+  const { data: hist } = await A.c.from("listening_history").select("reason, dedication").eq("room_id", room);
+  check("listen: history keeps skips, ends and dedications", hist?.length === 3 && hist.some((h) => h.dedication === "für dich ♡") && hist.some((h) => h.reason === "skipped"));
+  const { data: stats } = await L.c.rpc("listen_stats");
+  check("listen: stats", stats?.dedications >= 1);
+  const sp = await A.c.from("spotify_connections").insert({ user_id: A.id, spotify_user_id: "x" });
+  check("listen: spotify connections only via server", !!sp.error);
+}
+
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed ♡");
 process.exit(failures ? 1 : 0);

@@ -543,6 +543,104 @@ isOneToOne: true
                   Relationships: [
                     
                   ]
+                },"listening_history": {
+                  Row: {
+                    "added_by": string | null,"artist": string | null,"dedication": string | null,"ended_at": string,"id": string,"listened_ms": number,"provider": string,"reason": string,"ref": string,"room_id": string | null,"started_at": string,"thumb": string | null,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "added_by"?: string | null,"artist"?: string | null,"dedication"?: string | null,"ended_at"?: string,"id"?: string,"listened_ms"?: number,"provider": string,"reason": string,"ref": string,"room_id"?: string | null,"started_at": string,"thumb"?: string | null,"title": string
+                  }
+                  Update: {
+                    "added_by"?: string | null,"artist"?: string | null,"dedication"?: string | null,"ended_at"?: string,"id"?: string,"listened_ms"?: number,"provider"?: string,"reason"?: string,"ref"?: string,"room_id"?: string | null,"started_at"?: string,"thumb"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "listening_history_added_by_fkey"
+      columns: ["added_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "listening_history_room_id_fkey"
+      columns: ["room_id"]
+isOneToOne: false
+      referencedRelation: "listening_rooms"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"listening_queue": {
+                  Row: {
+                    "added_by": string,"artist": string | null,"created_at": string,"dedication": string | null,"duration_ms": number | null,"id": string,"provider": string,"ref": string,"room_id": string,"sort": number,"thumb": string | null,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "added_by"?: string,"artist"?: string | null,"created_at"?: string,"dedication"?: string | null,"duration_ms"?: number | null,"id"?: string,"provider": string,"ref": string,"room_id": string,"sort": number,"thumb"?: string | null,"title": string
+                  }
+                  Update: {
+                    "added_by"?: string,"artist"?: string | null,"created_at"?: string,"dedication"?: string | null,"duration_ms"?: number | null,"id"?: string,"provider"?: string,"ref"?: string,"room_id"?: string,"sort"?: number,"thumb"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "listening_queue_added_by_fkey"
+      columns: ["added_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "listening_queue_room_id_fkey"
+      columns: ["room_id"]
+isOneToOne: false
+      referencedRelation: "listening_rooms"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"listening_room_members": {
+                  Row: {
+                    "joined_at": string,"last_seen_at": string,"room_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "joined_at"?: string,"last_seen_at"?: string,"room_id": string,"user_id": string
+                  }
+                  Update: {
+                    "joined_at"?: string,"last_seen_at"?: string,"room_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "listening_room_members_room_id_fkey"
+      columns: ["room_id"]
+isOneToOne: false
+      referencedRelation: "listening_rooms"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "listening_room_members_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"listening_rooms": {
+                  Row: {
+                    "base_at": string,"base_pos_ms": number,"created_at": string,"created_by": string,"current_item": string | null,"id": string,"name": string,"status": string,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "base_at"?: string,"base_pos_ms"?: number,"created_at"?: string,"created_by"?: string,"current_item"?: string | null,"id"?: string,"name"?: string,"status"?: string,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "base_at"?: string,"base_pos_ms"?: number,"created_at"?: string,"created_by"?: string,"current_item"?: string | null,"id"?: string,"name"?: string,"status"?: string,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "listening_rooms_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"love_letters": {
                   Row: {
                     "author_id": string,"body": string,"category": string,"created_at": string,"id": string,"image_path": string | null,"open_at": string | null,"opened_at": string | null,"recipient_id": string | null,"title": string,"updated_at": string
@@ -869,6 +967,26 @@ isOneToOne: false
       foreignKeyName: "songs_added_by_fkey"
       columns: ["added_by"]
 isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"spotify_connections": {
+                  Row: {
+                    "connected_at": string,"display_name": string | null,"product": string | null,"spotify_user_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "connected_at"?: string,"display_name"?: string | null,"product"?: string | null,"spotify_user_id": string,"user_id": string
+                  }
+                  Update: {
+                    "connected_at"?: string,"display_name"?: string | null,"product"?: string | null,"spotify_user_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "spotify_connections_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
       referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
@@ -1341,6 +1459,36 @@ isOneToOne: false
 "is_member":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"listen_add":
+{ Args: { "p_artist": string,"p_dedication": string,"p_duration_ms": number,"p_provider": string,"p_ref": string,"p_room": string,"p_thumb": string,"p_title": string }; Returns: string
+                           },
+"listen_control":
+{ Args: { "p_action": string,"p_expect"?: string,"p_item"?: string,"p_pos_ms"?: number,"p_room": string }; Returns: Json
+                           },
+"listen_create":
+{ Args: { "p_name"?: string }; Returns: string
+                           },
+"listen_move":
+{ Args: { "p_dir": number,"p_item": string }; Returns: undefined
+                           },
+"listen_pos":
+{ Args: { "dur": number,"r": Omit<Database["public"]['Tables']["listening_rooms"]['Row'], Database["public"]['Tables']["listening_rooms"]['ComputedFields']> }; Returns: number
+                           },
+"listen_remove":
+{ Args: { "p_item": string }; Returns: undefined
+                           },
+"listen_set_duration":
+{ Args: { "p_item": string,"p_ms": number }; Returns: undefined
+                           },
+"listen_stats":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"listen_touch":
+{ Args: { "p_room": string }; Returns: undefined
+                           },
+"listen_touch_room":
+{ Args: { "p_room": string }; Returns: undefined
+                           },
 "log_activity":
 { Args: { "actor": string,"event_kind": string,"ref": string,"text_summary": string }; Returns: undefined
                            },
@@ -1384,6 +1532,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "author_id": string,"created_at": string,"id": string,"kind": string,"reveal_at": string,"wrap": string
             }[]
+                           },
+"spotify_save":
+{ Args: { "p_name": string,"p_product": string,"p_user": string }; Returns: undefined
                            },
 "unread_counts":
 { Args: Record<PropertyKey, never>; Returns: {
